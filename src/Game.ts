@@ -1,5 +1,5 @@
 import { View } from "./View"
-import { UpdateViewsContext } from "brigsby/dist/Engine"
+import { UpdateViewsContext } from "./Engine"
 
 export abstract class Game {
 

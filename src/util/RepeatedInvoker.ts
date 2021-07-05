@@ -1,5 +1,5 @@
 import { Component } from "../Component"
-import { UpdateData } from "brigsby/dist/Engine"
+import { UpdateData } from "../Engine"
 
 /**
  * A utility component for executing functions at random intervals.

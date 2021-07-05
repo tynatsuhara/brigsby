@@ -1,4 +1,4 @@
-import { UpdateData, StartData, AwakeData } from "brigsby/dist/Engine"
+import { AwakeData, StartData, UpdateData } from "./Engine"
 import { Entity } from "./Entity"
 import { RenderMethod } from "./renderer/RenderMethod"
 

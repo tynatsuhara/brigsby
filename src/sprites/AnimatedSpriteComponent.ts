@@ -1,4 +1,4 @@
-import { UpdateData } from "brigsby/dist/Engine"
+import { UpdateData } from "../Engine"
 import { Animator } from "../util/Animator"
 import { SpriteComponent } from "./SpriteComponent"
 import { SpriteAnimation } from "./SpriteAnimation"
