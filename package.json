@@ -1,0 +1,29 @@
+{
+  "name": "brigsby",
+  "version": "0.1.0",
+  "description": "A browser-based TypeScript game engine.",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylerbonnell/brigsby.git"
+  },
+  "keywords": [
+    "brigsby",
+    "game",
+    "engine",
+    "typescript"
+  ],
+  "author": "Tyler Bonnell",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tylerbonnell/brigsby/issues"
+  },
+  "homepage": "https://github.com/tylerbonnell/brigsby#readme",
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  }
+}
