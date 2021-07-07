@@ -28,12 +28,26 @@ export class RenderContext {
         return this.context.measureText(text)
     }
 
-    fillText(size: number, font: string, color: string, text: string, point: Point) {
+    fillText(size: number, font: string, color: string, text: string, point: Point, alignment: CanvasTextAlign) {
         const offset = this.view.offset.times(this.view.zoom).apply(Math.floor)
         this.context.font = `${size * this.view.zoom}px '${font}'`
         this.context.fillStyle = color
         point = point.times(this.view.zoom).apply(Math.floor).plus(offset)
+        this.context.textAlign = alignment
         this.context.fillText(text, point.x, point.y + size*this.view.zoom)
+    }
+
+    fillEllipse(pos: Point, dimensions: Point): void {
+        pos = pos.plus(this.view.offset).times(this.view.zoom)
+        const radiuses = dimensions.times(this.view.zoom).div(2)
+
+        this.context.beginPath();
+        this.context.ellipse(
+            pos.x + radiuses.x, pos.y + radiuses.y, 
+            radiuses.x, radiuses.y, 
+            0, 0, 2 * Math.PI
+        )
+        this.context.fill();
     }
 
     fillRect(pos: Point, dimensions: Point): void {

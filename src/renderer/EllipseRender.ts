@@ -2,11 +2,15 @@ import { Point } from "../Point"
 import { RenderContext } from "./RenderContext"
 import { RenderMethod } from "./RenderMethod"
 
-export class RectRender extends RenderMethod {
+export class EllipseRender extends RenderMethod {
     position: Point
     dimensions: Point
     color: string
 
+    /**
+     * @param position the top left position of the ellipse
+     * @param dimensions the diameters along the x and y axes
+     */
     constructor(
         { 
             depth = 0, 
@@ -28,6 +32,6 @@ export class RectRender extends RenderMethod {
 
     render(context: RenderContext): void {
         context.fillStyle = this.color;
-        context.fillRect(this.position, this.dimensions)
+        context.fillEllipse(this.position, this.dimensions)
     }
 }

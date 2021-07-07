@@ -8,6 +8,7 @@ export class TextRender extends RenderMethod {
     size: number
     font: string
     color: string
+    alignment: CanvasTextAlign
 
     constructor(
         text: string, 
@@ -15,7 +16,8 @@ export class TextRender extends RenderMethod {
         fontSizePx: number = 20,
         font: string = "Comic Sans MS Regular", 
         color: string = "red",
-        depth: number = 0
+        depth: number = 0,
+        alignment: CanvasTextAlign = "start",
     ) {
         super(depth)
         this.text = text
@@ -23,9 +25,10 @@ export class TextRender extends RenderMethod {
         this.size = fontSizePx
         this.font = font
         this.color = color
+        this.alignment = alignment
     }
 
     render(context: RenderContext): void {
-        context.fillText(this.size, this.font, this.color, this.text, this.position)
+        context.fillText(this.size, this.font, this.color, this.text, this.position, this.alignment)
     }
 }
