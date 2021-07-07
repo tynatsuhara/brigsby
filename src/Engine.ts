@@ -15,10 +15,9 @@ const MAX_ELAPSED_MILLIS = 1000/MINIMUM_ALLOWED_FPS
 
 export class UpdateViewsContext {
     readonly elapsedTimeMillis: number
-    readonly input: CapturedInput
-    readonly dimensions: Point
 }
 
+// Models for component updates
 export class AwakeData {}
 export class StartData {
     readonly dimensions: Point
@@ -37,6 +36,12 @@ export class Engine {
     private lastUpdateMillis = new Date().getTime()
 
     static start(game: Game, canvas: HTMLCanvasElement) {
+        if (!game) {
+            throw new Error("game cannot be null")
+        }
+        if (!canvas) {
+            throw new Error("canvas cannot be null")
+        }
         new Engine(game, canvas)
     }
 
@@ -58,15 +63,15 @@ export class Engine {
         // This means that visual lag can happen if fps < MINIMUM_ALLOWED_FPS.
         // We also want elapsed to always be > 0, which will occasionally not
         // be true, especially on the first update of a game.
-        const elapsed = Maths.clamp(time - this.lastUpdateMillis, MIN_ELAPSED_MILLIS, MAX_ELAPSED_MILLIS)
-    
+        const elapsedTimeMillis = Maths.clamp(time - this.lastUpdateMillis, MIN_ELAPSED_MILLIS, MAX_ELAPSED_MILLIS)
+        const input = this.input.captureInput()
+
         const updateViewsContext: UpdateViewsContext = {
-            elapsedTimeMillis: elapsed,
-            input: this.input.captureInput(),
-            dimensions: renderer.getDimensions()
+            elapsedTimeMillis,
         }
 
         const views = this.getViews(updateViewsContext)
+        collisionEngine._setViewContext(views)
 
         let componentsUpdated = 0
 
@@ -74,17 +79,17 @@ export class Engine {
             views.forEach(v => {
                 v.entities = v.entities.filter(e => !!e)
                 
-                collisionEngine._setViewContext(v)
-
+                const dimensions = renderer.getDimensions().div(v.zoom)
                 const startData: StartData = {
-                    dimensions: updateViewsContext.dimensions.div(v.zoom)
+                    dimensions,
                 }
                 const updateData: UpdateData = {
                     view: v,
-                    elapsedTimeMillis: updateViewsContext.elapsedTimeMillis,
-                    input: updateViewsContext.input.scaledForView(v),
-                    dimensions: updateViewsContext.dimensions.div(v.zoom)
+                    elapsedTimeMillis,
+                    input: input.scaledForView(v),
+                    dimensions,
                 }
+
                 // Behavior where an entity belongs to multiple views is undefined (revisit later, eg for splitscreen)
                 v.entities.forEach(e => e.components.forEach(c => {
                     if (!c.enabled) {
@@ -109,8 +114,8 @@ export class Engine {
                 const updateData: UpdateData = {
                     view: v,
                     elapsedTimeMillis: updateViewsContext.elapsedTimeMillis,
-                    input: updateViewsContext.input.scaledForView(v),
-                    dimensions: updateViewsContext.dimensions.div(v.zoom)
+                    input: input.scaledForView(v),
+                    dimensions: renderer.getDimensions().div(v.zoom)
                 }
                 v.entities.forEach(e => e.components.forEach(c => {
                     c.lateUpdate(updateData)
@@ -119,7 +124,7 @@ export class Engine {
         })
 
         if (debug.showProfiler) {
-            profiler.updateEngineTickStats(elapsed, updateDuration, renderDuration, lateUpdateDuration, componentsUpdated)
+            profiler.updateEngineTickStats(elapsedTimeMillis, updateDuration, renderDuration, lateUpdateDuration, componentsUpdated)
         }
         
         this.lastUpdateMillis = time

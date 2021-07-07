@@ -11,9 +11,8 @@ export class CollisionEngine {
 
     static readonly DEFAULT_LAYER = "default"
 
-    private colliders: Collider[] = []
-
     private matrix: Map<string, Set<string>>
+    private readonly colliderMap: Map<Collider, Collider[]> = new Map()
 
     constructor() {
         this.setCollisionMatrix(new Map())
@@ -42,14 +41,18 @@ export class CollisionEngine {
     /**
      * @param view The view whose contained colliders will be used for collision detection in the current update() step
      */
-    _setViewContext(view: View) {
-        this.colliders = view.entities
+    _setViewContext(views: View[]) {
+        this.colliderMap.clear()
+        views.forEach(v => {
+            const colliders = v.entities
                 .filter(e => !!e)
                 .flatMap(e => e.getComponents(Collider))
+            colliders.forEach(c => this.colliderMap.set(c, colliders))
+        })
     }
 
     // Needs further testing. No active use case right now.
-    _tryMove(collider: Collider, to: Point): Point {
+    /*_tryMove(collider: Collider, to: Point): Point {
         const translation = to.minus(collider.position)
         const pts = collider.getPoints()
 
@@ -75,22 +78,15 @@ export class CollisionEngine {
         } else {
             return to
         }
-    }
+    }*/
 
     // Returns true if the collider can be translated and will not intersect another collider in the new position.
     // This DOES NOT check for any possible colliders in the path of the collision and should only be used for small translations.
     _canTranslate(collider: Collider, translation: Point): boolean {
-        const collidingLayers = this.matrix.get(collider.layer)
-        if (!collidingLayers || collidingLayers.size === 0) {  // nothing will ever block this collider
-            return true
-        }
         // const translatedPoints = collider.getPoints().map(pt => pt.plus(translation))
         const bc = collider as BoxCollider
         const newTranslatedPos = bc.position.plus(translation)
-        return !this.colliders
-                .filter(other => 
-                    other !== collider && other.enabled && collidingLayers.has(other.layer) 
-                            && collider.ignoredColliders.indexOf(other) === -1 && other.ignoredColliders.indexOf(collider) === -1)  // potential collisions
+        return !this.getCollidable(collider)
                 .some(other => {
                     // TODO: Support non-box-colliders
                     const obc = other as BoxCollider
@@ -108,6 +104,20 @@ export class CollisionEngine {
                         bc.position.y + bc.dimensions.y < obc.position.y
                     )
                 }) 
+    }
+
+    private getCollidable(collider: Collider): Collider[] {
+        const collidingLayers = this.matrix.get(collider.layer)
+        if (!collidingLayers || collidingLayers.size === 0) {  // nothing will ever block this collider
+            return []
+        }
+        const others = this.colliderMap.get(collider)
+        if (!others) {
+            return []
+        }
+        return others.filter(other => 
+            other !== collider && other.enabled && collidingLayers.has(other.layer) 
+                    && collider.ignoredColliders.indexOf(other) === -1 && other.ignoredColliders.indexOf(collider) === -1)  // potential collisions
     }
 }
 
