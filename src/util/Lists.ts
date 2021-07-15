@@ -87,7 +87,7 @@ export const Lists = {
         }
 
         const freq = new Map<T, number>()
-        for (let item of list) {
+        for (const item of list) {
             freq.set(item, 1 + (freq.get(item) || 0))
         }  
         

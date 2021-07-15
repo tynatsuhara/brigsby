@@ -1,5 +1,6 @@
 import { Point } from "../Point"
 import { BinaryHeap } from "./BinaryHeap"
+import { Lists } from "./Lists"
 
 // an infinite grid using x/y coordinates (x increases to the right, y increases down)
 export class Grid<T> {
@@ -126,7 +127,7 @@ export class Grid<T> {
             
             const neighbors = getNeighbors(current).filter(pt => !isOccupied(pt) && !pt.equals(start))
             
-            for (let neighbor of neighbors) {
+            for (const neighbor of neighbors) {
                 const n = neighbor.toString()
                 const tentativeGScore = currentGScore + distance(current, neighbor)
                 const currentNeighborGScore = gScore.get(n)
@@ -149,11 +150,11 @@ export class Grid<T> {
         return null
     }
 
-    save(): { [key: string]: T } {
+    serialize(): { [key: string]: T } {
         return this.map
     }
 
-    static load<T>(map: { [key: string]: T }): Grid<T> {
+    static deserialize<T>(map: { [key: string]: T }): Grid<T> {
         const g = new Grid<T>()
         g.map = map
         return g
