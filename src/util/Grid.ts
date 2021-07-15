@@ -150,6 +150,25 @@ export class Grid<T> {
         return null
     }
 
+    /**
+     * Returns a copy of the grid where the contents are 
+     * repositioned with the top left starting at (0, 0)
+     */
+    normalized(): Grid<T> {
+        const entries = this.entries()
+        const result = new Grid<T>()
+        if (entries.length === 0) {
+            return result
+        }
+        const minX = Math.min(...entries.map(entry => entry[0].x))
+        const minY = Math.min(...entries.map(entry => entry[0].y))
+        const shift = new Point(-minX, -minY)
+        for (const entry of entries) {
+            result.set(entry[0].plus(shift), entry[1])
+        }
+        return result
+    }
+
     serialize(): { [key: string]: T } {
         return this.map
     }
