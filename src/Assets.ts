@@ -35,11 +35,15 @@ class Assets {
 
     loadAudioFiles(relativePaths: string[]): Promise<void[]> {
         const promises = relativePaths.map(path => new Promise<void>(resolve => {
-            fetch(path).then(response => response.blob()).then(blob => {
-                const audioBlob = URL.createObjectURL(blob)
-                this.audioMap.set(path, audioBlob)
+            if (this.audioMap.has(path)) {
                 resolve()
-            })
+            } else {
+                fetch(path).then(response => response.blob()).then(blob => {
+                    const audioBlob = URL.createObjectURL(blob)
+                    this.audioMap.set(path, audioBlob)
+                    resolve()
+                })
+            }
         }))
 
         return Promise.all(promises)
