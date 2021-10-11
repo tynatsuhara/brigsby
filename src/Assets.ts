@@ -12,7 +12,15 @@ class Assets {
      * @param font a font specification using CSS value syntax, eg "italic bold 16px Roboto"
      */
     loadFont(font: string, src: string): Promise<void> {
-        return new window["FontFace"](font, src).load().then(ff => document["fonts"].add(ff))
+        if (!font.startsWith('"')) {
+            font = '"' + font
+        }
+        if (!font.endsWith('"')) {
+            font = font + '"'
+        }
+        return new FontFace(font, src)
+            .load()
+            .then(ff => { document["fonts"].add(ff) })
     }
 
     loadImageFiles(relativePaths: string[]): Promise<void[]> {
