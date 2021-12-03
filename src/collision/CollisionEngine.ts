@@ -8,7 +8,6 @@ import { Collider } from "./Collider"
  * This class manages collisions between collider components
  */
 export class CollisionEngine {
-
     static readonly DEFAULT_LAYER = "default"
 
     private matrix: Map<string, Set<string>>
@@ -43,11 +42,11 @@ export class CollisionEngine {
      */
     _setViewContext(views: View[]) {
         this.colliderMap.clear()
-        views.forEach(v => {
+        views.forEach((v) => {
             const colliders = v.entities
-                .filter(e => !!e)
-                .flatMap(e => e.getComponents(Collider))
-            colliders.forEach(c => this.colliderMap.set(c, colliders))
+                .filter((e) => !!e)
+                .flatMap((e) => e.getComponents(Collider))
+            colliders.forEach((c) => this.colliderMap.set(c, colliders))
         })
     }
 
@@ -86,38 +85,44 @@ export class CollisionEngine {
         // const translatedPoints = collider.getPoints().map(pt => pt.plus(translation))
         const bc = collider as BoxCollider
         const newTranslatedPos = bc.position.plus(translation)
-        return !this.getCollidable(collider)
-                .some(other => {
-                    // TODO: Support non-box-colliders
-                    const obc = other as BoxCollider
-                    const willCollide = !(
-                        newTranslatedPos.x > obc.position.x + obc.dimensions.x ||
-                        newTranslatedPos.y > obc.position.y + obc.dimensions.y ||
-                        newTranslatedPos.x + bc.dimensions.x < obc.position.x ||
-                        newTranslatedPos.y + bc.dimensions.y < obc.position.y
-                    )
-                    // && !isAlreadyColliding
-                    return willCollide && (
-                        bc.position.x > obc.position.x + obc.dimensions.x ||
-                        bc.position.y > obc.position.y + obc.dimensions.y ||
-                        bc.position.x + bc.dimensions.x < obc.position.x ||
-                        bc.position.y + bc.dimensions.y < obc.position.y
-                    )
-                }) 
+        return !this.getCollidable(collider).some((other) => {
+            // TODO: Support non-box-colliders
+            const obc = other as BoxCollider
+            const willCollide = !(
+                newTranslatedPos.x > obc.position.x + obc.dimensions.x ||
+                newTranslatedPos.y > obc.position.y + obc.dimensions.y ||
+                newTranslatedPos.x + bc.dimensions.x < obc.position.x ||
+                newTranslatedPos.y + bc.dimensions.y < obc.position.y
+            )
+            // && !isAlreadyColliding
+            return (
+                willCollide &&
+                (bc.position.x > obc.position.x + obc.dimensions.x ||
+                    bc.position.y > obc.position.y + obc.dimensions.y ||
+                    bc.position.x + bc.dimensions.x < obc.position.x ||
+                    bc.position.y + bc.dimensions.y < obc.position.y)
+            )
+        })
     }
 
     private getCollidable(collider: Collider): Collider[] {
         const collidingLayers = this.matrix.get(collider.layer)
-        if (!collidingLayers || collidingLayers.size === 0) {  // nothing will ever block this collider
+        if (!collidingLayers || collidingLayers.size === 0) {
+            // nothing will ever block this collider
             return []
         }
         const others = this.colliderMap.get(collider)
         if (!others) {
             return []
         }
-        return others.filter(other => 
-            other !== collider && other.enabled && collidingLayers.has(other.layer) 
-                    && collider.ignoredColliders.indexOf(other) === -1 && other.ignoredColliders.indexOf(collider) === -1)  // potential collisions
+        return others.filter(
+            (other) =>
+                other !== collider &&
+                other.enabled &&
+                collidingLayers.has(other.layer) &&
+                collider.ignoredColliders.indexOf(other) === -1 &&
+                other.ignoredColliders.indexOf(collider) === -1
+        ) // potential collisions
     }
 }
 

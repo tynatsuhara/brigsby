@@ -6,15 +6,14 @@ import { RectRender } from "../../src/renderer/RectRender"
 import { Maths } from "../../src/util/Maths"
 
 export class Paddle extends Component {
-
     static readonly PADDING_FROM_EDGE = 20
     static readonly DIMENSIONS = new Point(16, 80)
-    static readonly MOVE_SPEED = .6
+    static readonly MOVE_SPEED = 0.6
 
     private pos: Point
     private readonly upKey: InputKey
     private readonly downKey: InputKey
-    velocity: number  // -1, 0, 1
+    velocity: number // -1, 0, 1
 
     constructor(pos: Point, upKey: InputKey, downKey: InputKey) {
         super()
@@ -33,8 +32,8 @@ export class Paddle extends Component {
         }
 
         const newY = Maths.clamp(
-            this.pos.y + (this.velocity * (Paddle.MOVE_SPEED * data.elapsedTimeMillis)), 
-            0, 
+            this.pos.y + this.velocity * (Paddle.MOVE_SPEED * data.elapsedTimeMillis),
+            0,
             data.dimensions.y - Paddle.DIMENSIONS.y
         )
 
@@ -51,7 +50,7 @@ export class Paddle extends Component {
                 position: this.pos,
                 dimensions: Paddle.DIMENSIONS,
                 color: "#fff6d3",
-            })
+            }),
         ]
     }
 }

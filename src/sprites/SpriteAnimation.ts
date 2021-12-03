@@ -6,7 +6,7 @@ import { AnimatedSpriteComponent } from "./AnimatedSpriteComponent"
 export class SpriteAnimation implements SpriteSource {
     readonly frames: [StaticSpriteSource, number][] // a list of (source, duration)
     readonly onFinish: () => void
-    
+
     /**
      * @param frames A list of sprite sources and a duration in milliseconds that each one will last
      */
@@ -24,6 +24,6 @@ export class SpriteAnimation implements SpriteSource {
     }
 
     filtered(filter: (img: ImageData) => ImageData): SpriteAnimation {
-        return new SpriteAnimation(this.frames.map(f => [f[0].filtered(filter), f[1]]))
+        return new SpriteAnimation(this.frames.map((f) => [f[0].filtered(filter), f[1]]))
     }
 }

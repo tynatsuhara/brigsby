@@ -6,22 +6,27 @@ import { RenderMethod } from "../renderer/RenderMethod"
 import { CollisionEngine, collisionEngine } from "./CollisionEngine"
 
 /**
- * A collider detects intersections with other colliders. Other 
+ * A collider detects intersections with other colliders. Other
  * colliders will not be able to move in to this collider's space.
  */
 export abstract class Collider extends Component {
+    private _position: Point // top-left
+    get position() {
+        return this._position
+    }
 
-    private _position: Point  // top-left
-    get position() { return this._position }
-
-    readonly layer: string    
+    readonly layer: string
     readonly ignoredColliders: Collider[]
 
     /**
      * @param position top left position
      * @param layer determines which colliders collide based on the collision matrix
      */
-    constructor(position: Point, layer = CollisionEngine.DEFAULT_LAYER, ignoredColliders: Collider[] = []) {
+    constructor(
+        position: Point,
+        layer = CollisionEngine.DEFAULT_LAYER,
+        ignoredColliders: Collider[] = []
+    ) {
         super()
         this._position = position
         this.layer = layer
@@ -55,11 +60,11 @@ export abstract class Collider extends Component {
         if (!debug.showColliders) {
             return []
         }
-        
+
         const color = "#ff0000"
         const pts = this.getPoints()
         const lines = []
-        let lastPt = pts[pts.length-1]
+        let lastPt = pts[pts.length - 1]
         for (const pt of pts) {
             lines.push(new LineRender(pt, lastPt, color))
             lastPt = pt
@@ -77,7 +82,7 @@ export abstract class Collider extends Component {
         let resultDist = 0
 
         const pts = this.getPoints()
-        let lastPt = pts[pts.length-1]
+        let lastPt = pts[pts.length - 1]
 
         for (const pt of pts) {
             const intersect = this.lineIntersect(pt, lastPt, start, end)
@@ -96,7 +101,7 @@ export abstract class Collider extends Component {
 
     checkWithinBoundsAfterTranslation(translation: Point, other: Collider) {
         this._position = this._position.plus(translation)
-        const result = other.getPoints().some(p => this.isWithinBounds(p))
+        const result = other.getPoints().some((p) => this.isWithinBounds(p))
         this._position = this._position.minus(translation)
         return result
     }
@@ -113,29 +118,34 @@ export abstract class Collider extends Component {
         const y4 = line2End.y
 
         // lines with the same slope don't intersect
-        if (((x1-x2) * (y3-y4) - (y1-y2) * (x3-x4)) == 0) {
+        if ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4) == 0) {
             return null
         }
 
-        const tNumerator = (x1-x3) * (y3-y4) - (y1-y3) * (x3-x4)
-        const uNumerator = -((x1-x2) * (y1-y3) - (y1-y2) * (x1-x3))
-        const denominator = (x1-x2) * (y3-y4) - (y1-y2) * (x3-x4)
+        const tNumerator = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)
+        const uNumerator = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3))
+        const denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
 
-        if (tNumerator >= 0 && tNumerator <= denominator && uNumerator >= 0 && uNumerator <= denominator) {
-            const t = tNumerator/denominator
-            return new Point(x1 + t * (x2-x1), y1 + t * (y2-y1))
+        if (
+            tNumerator >= 0 &&
+            tNumerator <= denominator &&
+            uNumerator >= 0 &&
+            uNumerator <= denominator
+        ) {
+            const t = tNumerator / denominator
+            return new Point(x1 + t * (x2 - x1), y1 + t * (y2 - y1))
         }
 
         return null
     }
-    
+
     /**
      * Returns the points which form the shape of the collider.
      * If any of these points are contained within another collider,
      * they are considered to be colliding.
      */
     abstract getPoints(): Point[]
-    
+
     /**
      * Returns true if pt is located within the collider.
      */

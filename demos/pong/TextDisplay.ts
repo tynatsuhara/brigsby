@@ -7,7 +7,6 @@ const FONT = "Lexend Deca"
 const COLOR = "#fff6d3"
 
 export class TextDisplay extends Component {
-
     playerOneScore = 0
     playerTwoScore = 0
 
@@ -16,7 +15,7 @@ export class TextDisplay extends Component {
             return [
                 new TextRender(
                     `${this.playerOneScore} : ${this.playerTwoScore}`,
-                    new Point(data.dimensions.x/2, 15),
+                    new Point(data.dimensions.x / 2, 15),
                     30,
                     FONT,
                     COLOR,
@@ -25,7 +24,7 @@ export class TextDisplay extends Component {
                 ),
                 new TextRender(
                     "P1: W/S, P2: UP/DOWN, SPACE TO LAUNCH",
-                    new Point(data.dimensions.x/2, data.dimensions.y - 40),
+                    new Point(data.dimensions.x / 2, data.dimensions.y - 40),
                     20,
                     FONT,
                     COLOR,

@@ -4,7 +4,8 @@ Brigsby is a TypeScript game engine that runs in the browser, originally develop
 
 ## Install
 
-Brigsby is available on [npm](https://www.npmjs.com/package/brigsby/). Just add it to your dependencies! 
+Brigsby is available on [npm](https://www.npmjs.com/package/brigsby/). Just add it to your dependencies!
+
 ```
 npm i brigsby
 ```

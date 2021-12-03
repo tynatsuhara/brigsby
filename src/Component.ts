@@ -3,17 +3,18 @@ import { Entity } from "./Entity"
 import { RenderMethod } from "./renderer/RenderMethod"
 
 export abstract class Component {
-
     entity: Entity
     enabled: boolean = true
-    get isStarted() { return this.start === ALREADY_STARTED_COMPONENT }
+    get isStarted() {
+        return this.start === ALREADY_STARTED_COMPONENT
+    }
 
     /**
      * Called once, immediately after entity is defined and before start() is called.
      * It is safe to add additional components to the entity in this function.
      */
     awake(awakeData: AwakeData) {}
-    
+
     /**
      * Called once, after the component is added to a valid entity and before update() is called
      */

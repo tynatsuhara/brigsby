@@ -13,7 +13,7 @@ export class BinaryHeap<T> {
     }
 
     pushAll(elements: T[]) {
-        elements.forEach(item => this.push(item))
+        elements.forEach((item) => this.push(item))
     }
 
     push(element: T) {
@@ -47,7 +47,7 @@ export class BinaryHeap<T> {
             let end = this.content.pop()
             // If the element we popped was the one we needed to remove, we're done.
             if (i == length - 1) break
-            // Otherwise, we replace the removed element with the popped one, 
+            // Otherwise, we replace the removed element with the popped one,
             // and allow it to float up or sink down as appropriate.
             this.content[i] = end
             this.bubbleUp(i)
@@ -70,15 +70,15 @@ export class BinaryHeap<T> {
 
     private bubbleUp(n: number) {
         // Fetch the element that has to be moved.
-        let element = this.content[n], score = this.scoreFunction(element)
+        let element = this.content[n],
+            score = this.scoreFunction(element)
         // When at 0, an element can not go up any further.
         while (n > 0) {
             // Compute the parent element's index, and fetch it.
             let parentN = Math.floor((n + 1) / 2) - 1,
                 parent = this.content[parentN]
             // If the parent has a lesser score, things are in order and we are done.
-            if (score >= this.scoreFunction(parent))
-                break
+            if (score >= this.scoreFunction(parent)) break
 
             // Otherwise, swap the parent with the current element and continue.
             this.content[parentN] = element
@@ -95,7 +95,8 @@ export class BinaryHeap<T> {
 
         while (true) {
             // Compute the indices of the child elements.
-            var child2N = (n + 1) * 2, child1N = child2N - 1
+            var child2N = (n + 1) * 2,
+                child1N = child2N - 1
             // This is used to store the new position of the element, if any.
             var swap = null
             // If the first child exists (is inside the array)...
@@ -104,15 +105,13 @@ export class BinaryHeap<T> {
                 var child1 = this.content[child1N],
                     child1Score = this.scoreFunction(child1)
                 // If the score is less than our element's, we need to swap.
-                if (child1Score < elemScore)
-                    swap = child1N
+                if (child1Score < elemScore) swap = child1N
             }
             // Do the same checks for the other child.
             if (child2N < length) {
                 var child2 = this.content[child2N],
                     child2Score = this.scoreFunction(child2)
-                if (child2Score < (swap == null ? elemScore : child1Score))
-                    swap = child2N
+                if (child2Score < (swap == null ? elemScore : child1Score)) swap = child2N
             }
 
             // No need to swap further, we are done.
@@ -124,4 +123,4 @@ export class BinaryHeap<T> {
             n = swap
         }
     }
-} 
+}

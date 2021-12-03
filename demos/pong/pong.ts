@@ -10,13 +10,12 @@ import { Paddle } from "./Paddle"
 import { TextDisplay } from "./TextDisplay"
 
 class PongGame extends Game {
-
     private view: View
 
     initialize() {
         const dimensions = renderer.getDimensions()
         const textDisplay = new TextDisplay()
-        const centerY = (dimensions.y - Paddle.DIMENSIONS.y)/2
+        const centerY = (dimensions.y - Paddle.DIMENSIONS.y) / 2
         const player1 = new Paddle(
             new Point(Paddle.PADDING_FROM_EDGE, centerY),
             InputKey.W,
@@ -28,7 +27,7 @@ class PongGame extends Game {
             InputKey.DOWN
         )
         const ball = new Ball(dimensions.div(2), player1, player2, textDisplay)
-        
+
         this.view = {
             entities: [
                 new Entity([textDisplay]),
@@ -37,14 +36,11 @@ class PongGame extends Game {
                 new Entity([ball]),
             ],
             zoom: 1,
-            offset: Point.ZERO
+            offset: Point.ZERO,
         }
     }
 
     getViews = () => [this.view]
 }
 
-Engine.start(
-    new PongGame(), 
-    <HTMLCanvasElement>document.getElementById('pong-canvas')
-)
+Engine.start(new PongGame(), <HTMLCanvasElement>document.getElementById("pong-canvas"))

@@ -1,32 +1,34 @@
 {
-  "name": "brigsby",
-  "version": "0.3.4",
-  "description": "A browser-based TypeScript game engine.",
-  "scripts": {
-    "clean": "rm -rf dist",
-    "build": "tsc",
-    "prepare": "npm run clean && npm run build"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tylerbonnell/brigsby.git"
-  },
-  "keywords": [
-    "brigsby",
-    "game",
-    "engine",
-    "typescript"
-  ],
-  "author": "Tyler Bonnell",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/tylerbonnell/brigsby/issues"
-  },
-  "homepage": "https://github.com/tylerbonnell/brigsby#readme",
-  "devDependencies": {
-    "typescript": "^4.3.5"
-  },
-  "dependencies": {
-    "@types/css-font-loading-module": "^0.0.6"
-  }
+    "name": "brigsby",
+    "version": "0.3.4",
+    "description": "A browser-based TypeScript game engine.",
+    "scripts": {
+        "clean": "rm -rf dist",
+        "build": "tsc",
+        "prepare": "npm run clean && npm run format && npm run build",
+        "format": "npx prettier --write ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tylerbonnell/brigsby.git"
+    },
+    "keywords": [
+        "brigsby",
+        "game",
+        "engine",
+        "typescript"
+    ],
+    "author": "Tyler Bonnell",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/tylerbonnell/brigsby/issues"
+    },
+    "homepage": "https://github.com/tylerbonnell/brigsby#readme",
+    "devDependencies": {
+        "prettier": "^2.5.0",
+        "typescript": "^4.3.5"
+    },
+    "dependencies": {
+        "@types/css-font-loading-module": "^0.0.6"
+    }
 }

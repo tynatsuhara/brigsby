@@ -19,7 +19,7 @@ export class SpriteComponent extends Component {
             transform.dimensions = sprite.dimensions
         }
     }
-    
+
     getRenderMethods(): ImageRender[] {
         return [this.sprite.toImageRender(this.transform)]
     }

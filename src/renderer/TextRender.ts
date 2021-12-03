@@ -4,20 +4,20 @@ import { RenderMethod } from "./RenderMethod"
 
 export class TextRender extends RenderMethod {
     text: string
-    position: Point  // top-left
+    position: Point // top-left
     size: number
     font: string
     color: string
     alignment: CanvasTextAlign
 
     constructor(
-        text: string, 
-        position: Point, 
+        text: string,
+        position: Point,
         fontSizePx: number = 20,
-        font: string = "Comic Sans MS Regular", 
+        font: string = "Comic Sans MS Regular",
         color: string = "red",
         depth: number = 0,
-        alignment: CanvasTextAlign = "start",
+        alignment: CanvasTextAlign = "start"
     ) {
         super(depth)
         this.text = text

@@ -7,19 +7,17 @@ export class RectRender extends RenderMethod {
     dimensions: Point
     color: string
 
-    constructor(
-        { 
-            depth = 0, 
-            position = Point.ZERO, 
-            dimensions = Point.ZERO, 
-            color = "#ff0000" 
-        }: { 
-            depth?: number, 
-            position?: Point, 
-            dimensions?: Point, 
-            color?: string 
-        } = {}
-    ) {
+    constructor({
+        depth = 0,
+        position = Point.ZERO,
+        dimensions = Point.ZERO,
+        color = "#ff0000",
+    }: {
+        depth?: number
+        position?: Point
+        dimensions?: Point
+        color?: string
+    } = {}) {
         super(depth)
         this.position = position
         this.dimensions = dimensions
@@ -27,7 +25,7 @@ export class RectRender extends RenderMethod {
     }
 
     render(context: RenderContext): void {
-        context.fillStyle = this.color;
+        context.fillStyle = this.color
         context.fillRect(this.position, this.dimensions)
     }
 }

@@ -28,8 +28,8 @@ export class AnimatedSpriteComponent extends SpriteComponent {
     goToAnimation(animationIndex: number) {
         const anim = this.animations[animationIndex]
         this.animator = new Animator(
-            anim.frames.map(f => f[1]), 
-            index => {
+            anim.frames.map((f) => f[1]),
+            (index) => {
                 this.sprite = anim.getSprite(index)
             },
             anim.onFinish
@@ -44,7 +44,7 @@ export class AnimatedSpriteComponent extends SpriteComponent {
     play() {
         this.animator.paused = false
     }
-    
+
     update(updateData: UpdateData) {
         if (!this.animator.paused) {
             this.animator.update(updateData.elapsedTimeMillis)
@@ -57,6 +57,6 @@ export class AnimatedSpriteComponent extends SpriteComponent {
 
     // This won't currently refresh the animation
     applyFilter(filter: (img: ImageData) => ImageData) {
-        this.animations = this.animations.map(a => a?.filtered(filter))
+        this.animations = this.animations.map((a) => a?.filtered(filter))
     }
 }

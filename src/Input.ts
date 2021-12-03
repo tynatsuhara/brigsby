@@ -3,14 +3,55 @@ import { View } from "./View"
 
 // enum referencing event.code
 export enum InputKey {
-    ZERO = 'Digit0', ONE = 'Digit1', TWO = 'Digit2', THREE = 'Digit3', FOUR = 'Digit4', 
-    FIVE = 'Digit5', SIX = 'Digit6', SEVEN = 'Digit7', EIGHT = 'Digit8', NINE = 'Digit9',
-    Q = 'KeyQ', W = 'KeyW', E = 'KeyE', R = 'KeyR', T = 'KeyT', Y = 'KeyT', U = 'KeyU', I = 'KeyI', O = 'KeyO', P = 'KeyP',
-    A = 'KeyA', S = 'KeyS', D = 'KeyD', F = 'KeyF', G = 'KeyG', H = 'KeyH', J = 'KeyJ', K = 'KeyK', L = 'KeyL', 
-    Z = 'KeyZ', X = 'KeyX', C = 'KeyC', V = 'KeyV', B = 'KeyB', N = 'KeyN', M = 'KeyM', 
-    COMMA = 'Comma', PERIOD = 'Period', TAB = 'Tab', SHIFT = 'ShiftLeft', CONTROL = 'ControlLeft',
-    SPACE = 'Space', ESC = 'Escape', SEMICOLON = 'Semicolon', QUOTE = 'Quote',
-    UP = 'ArrowUp', DOWN = 'ArrowDown', LEFT = 'ArrowLeft', RIGHT = 'ArrowRight',
+    ZERO = "Digit0",
+    ONE = "Digit1",
+    TWO = "Digit2",
+    THREE = "Digit3",
+    FOUR = "Digit4",
+    FIVE = "Digit5",
+    SIX = "Digit6",
+    SEVEN = "Digit7",
+    EIGHT = "Digit8",
+    NINE = "Digit9",
+    Q = "KeyQ",
+    W = "KeyW",
+    E = "KeyE",
+    R = "KeyR",
+    T = "KeyT",
+    Y = "KeyT",
+    U = "KeyU",
+    I = "KeyI",
+    O = "KeyO",
+    P = "KeyP",
+    A = "KeyA",
+    S = "KeyS",
+    D = "KeyD",
+    F = "KeyF",
+    G = "KeyG",
+    H = "KeyH",
+    J = "KeyJ",
+    K = "KeyK",
+    L = "KeyL",
+    Z = "KeyZ",
+    X = "KeyX",
+    C = "KeyC",
+    V = "KeyV",
+    B = "KeyB",
+    N = "KeyN",
+    M = "KeyM",
+    COMMA = "Comma",
+    PERIOD = "Period",
+    TAB = "Tab",
+    SHIFT = "ShiftLeft",
+    CONTROL = "ControlLeft",
+    SPACE = "Space",
+    ESC = "Escape",
+    SEMICOLON = "Semicolon",
+    QUOTE = "Quote",
+    UP = "ArrowUp",
+    DOWN = "ArrowDown",
+    LEFT = "ArrowLeft",
+    RIGHT = "ArrowRight",
 }
 
 export const InputKeyString = {
@@ -21,18 +62,23 @@ export const InputKeyString = {
             return inputKey.replace("Digit", "")
         }
         switch (inputKey) {
-            case InputKey.COMMA: return ','
-            case InputKey.PERIOD: return '.'
-            case InputKey.SEMICOLON: return ';'
-            case InputKey.QUOTE: return '"'
-            default: return inputKey
+            case InputKey.COMMA:
+                return ","
+            case InputKey.PERIOD:
+                return "."
+            case InputKey.SEMICOLON:
+                return ";"
+            case InputKey.QUOTE:
+                return '"'
+            default:
+                return inputKey
         }
-    }
+    },
 }
 
 const enum MouseButton {
     LEFT = 0,
-    RIGHT = 2
+    RIGHT = 2,
 }
 
 export class Input {
@@ -41,41 +87,42 @@ export class Input {
     private mousePos: Point = new Point(0, 0)
     private isMouseDown: boolean = false
     private isMouseHeld: boolean = false
-    private isMouseUp: boolean = false 
+    private isMouseUp: boolean = false
     private isRightMouseDown: boolean = false
     private isRightMouseHeld: boolean = false
-    private isRightMouseUp: boolean = false 
+    private isRightMouseUp: boolean = false
     private mouseWheelDeltaY: number = 0
 
     constructor(canvas: HTMLCanvasElement) {
         canvas.oncontextmenu = () => false
 
-        canvas.onmousedown = (e) => { 
+        canvas.onmousedown = (e) => {
             if (e.button === MouseButton.LEFT) {
-                this.isMouseDown = true 
+                this.isMouseDown = true
                 this.isMouseHeld = true
                 this.isMouseUp = false
             } else if (e.button == MouseButton.RIGHT) {
-                this.isRightMouseDown = true 
+                this.isRightMouseDown = true
                 this.isRightMouseHeld = true
                 this.isRightMouseUp = false
             }
         }
-        canvas.onmouseup = (e) => { 
+        canvas.onmouseup = (e) => {
             if (e.button === MouseButton.LEFT) {
                 this.isMouseDown = false
                 this.isMouseHeld = false
-                this.isMouseUp = true 
+                this.isMouseUp = true
             } else if (e.button === MouseButton.RIGHT) {
-                this.isRightMouseDown = false 
+                this.isRightMouseDown = false
                 this.isRightMouseHeld = false
                 this.isRightMouseUp = true
             }
-        }        
-        canvas.onmousemove = e => this.mousePos = new Point(e.x - canvas.offsetLeft, e.y - canvas.offsetTop)
-        canvas.onwheel = e => this.mouseWheelDeltaY = e.deltaY
-        window.onkeydown = e => this.keys.add(this.captureKey(e).code)
-        window.onkeyup = e => this.keys.delete(this.captureKey(e).code)
+        }
+        canvas.onmousemove = (e) =>
+            (this.mousePos = new Point(e.x - canvas.offsetLeft, e.y - canvas.offsetTop))
+        canvas.onwheel = (e) => (this.mouseWheelDeltaY = e.deltaY)
+        window.onkeydown = (e) => this.keys.add(this.captureKey(e).code)
+        window.onkeyup = (e) => this.keys.delete(this.captureKey(e).code)
     }
 
     captureInput(): CapturedInput {
@@ -83,9 +130,9 @@ export class Input {
 
         const keys = Array.from(this.keys)
         this.lastCapture = new CapturedInput(
-            new Set(keys.filter(key => !this.lastCapture.isKeyHeld(key as InputKey))),
+            new Set(keys.filter((key) => !this.lastCapture.isKeyHeld(key as InputKey))),
             new Set(keys.slice()),
-            new Set(this.lastCapture.getKeysHeld().filter(key => !this.keys.has(key))),
+            new Set(this.lastCapture.getKeysHeld().filter((key) => !this.keys.has(key))),
             this.mousePos,
             this.isMouseDown,
             this.isMouseHeld,
@@ -93,7 +140,7 @@ export class Input {
             this.isRightMouseDown,
             this.isRightMouseHeld,
             this.isRightMouseUp,
-            this.mouseWheelDeltaY,
+            this.mouseWheelDeltaY
         )
 
         // reset since these should only be true for 1 tick
@@ -129,7 +176,7 @@ export class CapturedInput {
     readonly mouseWheelDeltaY: number
 
     constructor(
-        keysDown: Set<string> = new Set(), 
+        keysDown: Set<string> = new Set(),
         keysHeld: Set<string> = new Set(),
         keysUp: Set<string> = new Set(),
         mousePos: Point = new Point(0, 0),
@@ -139,7 +186,7 @@ export class CapturedInput {
         isRightMouseDown: boolean = false,
         isRightMouseHeld: boolean = false,
         isRightMouseUp: boolean = false,
-        mouseWheelDeltaY: number = 0,
+        mouseWheelDeltaY: number = 0
     ) {
         this.keysDown = keysDown
         this.keysHeld = keysHeld

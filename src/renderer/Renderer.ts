@@ -3,7 +3,6 @@ import { View } from "../View"
 import { RenderContext } from "./RenderContext"
 
 class Renderer {
-
     private canvas: HTMLCanvasElement
     private context: CanvasRenderingContext2D
 
@@ -13,7 +12,7 @@ class Renderer {
 
     _setCanvas(canvas: HTMLCanvasElement) {
         this.canvas = canvas
-        this.context = canvas.getContext('2d', { alpha: true })
+        this.context = canvas.getContext("2d", { alpha: true })
         this.resizeCanvas()
     }
 
@@ -21,8 +20,8 @@ class Renderer {
         this.resizeCanvas()
         this.context.imageSmoothingEnabled = false
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        
-        views.forEach(v => this.renderView(v))
+
+        views.forEach((v) => this.renderView(v))
     }
 
     private resizeCanvas() {
@@ -34,12 +33,12 @@ class Renderer {
     private renderView(view: View) {
         const viewRenderContext = new RenderContext(this.canvas, this.context, view)
         view.entities
-                .flatMap(entity => entity?.components)
-                .filter(component => !!component && component.enabled && component.isStarted)
-                .flatMap(component => component.getRenderMethods())
-                .filter(render => !!render)
-                .sort((a, b) => a.depth - b.depth)  // TODO possibly improve this
-                .forEach(renderMethod => renderMethod.render(viewRenderContext))
+            .flatMap((entity) => entity?.components)
+            .filter((component) => !!component && component.enabled && component.isStarted)
+            .flatMap((component) => component.getRenderMethods())
+            .filter((render) => !!render)
+            .sort((a, b) => a.depth - b.depth) // TODO possibly improve this
+            .forEach((renderMethod) => renderMethod.render(viewRenderContext))
     }
 }
 

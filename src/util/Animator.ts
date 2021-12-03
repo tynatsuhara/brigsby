@@ -1,11 +1,11 @@
-export class Animator {    
-    paused: boolean 
-    private readonly frames: number[]  // a list of end-of-frame timestamps
-    private readonly duration: number  // total duration
+export class Animator {
+    paused: boolean
+    private readonly frames: number[] // a list of end-of-frame timestamps
+    private readonly duration: number // total duration
 
     // callbacks
     private readonly onFrameChange: (index: number) => void
-    private readonly onFinish: () => void  // called when the last frame finishes
+    private readonly onFinish: () => void // called when the last frame finishes
 
     private time: number = 0
     private index: number = 0
@@ -15,9 +15,9 @@ export class Animator {
      * @param fn A callback that will be called each time a frame changes, passing the zero-based frame index
      */
     constructor(
-        frames: number[], 
+        frames: number[],
         onFrameChange: (index: number) => void = () => {},
-        onFinish: () => void = () => {},
+        onFinish: () => void = () => {}
     ) {
         this.onFrameChange = onFrameChange
         this.onFinish = onFinish

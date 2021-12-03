@@ -2,3 +2,5 @@ node_modules/
 demos/
 docs/
 .github/
+.prettierrc.json
+.prettierignore

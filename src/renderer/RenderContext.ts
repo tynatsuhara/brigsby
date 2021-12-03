@@ -5,7 +5,7 @@ export class RenderContext {
     private readonly canvas: HTMLCanvasElement
     private readonly context: CanvasRenderingContext2D
     private readonly view: View
-    
+
     readonly width: number
     readonly height: number
 
@@ -18,36 +18,55 @@ export class RenderContext {
         this.height = canvas.height
     }
 
-    set lineWidth(value: number) { this.context.lineWidth = value }
-    set strokeStyle(value: string) { this.context.strokeStyle = value }
+    set lineWidth(value: number) {
+        this.context.lineWidth = value
+    }
+    set strokeStyle(value: string) {
+        this.context.strokeStyle = value
+    }
 
-    set font(value: string) { this.context.font = value }
-    set fillStyle(value: string) { this.context.fillStyle = value }
+    set font(value: string) {
+        this.context.font = value
+    }
+    set fillStyle(value: string) {
+        this.context.fillStyle = value
+    }
 
     measureText(text: any) {
         return this.context.measureText(text)
     }
 
-    fillText(size: number, font: string, color: string, text: string, point: Point, alignment: CanvasTextAlign) {
+    fillText(
+        size: number,
+        font: string,
+        color: string,
+        text: string,
+        point: Point,
+        alignment: CanvasTextAlign
+    ) {
         const offset = this.view.offset.times(this.view.zoom).apply(Math.floor)
         this.context.font = `${size * this.view.zoom}px '${font}'`
         this.context.fillStyle = color
         point = point.times(this.view.zoom).apply(Math.floor).plus(offset)
         this.context.textAlign = alignment
-        this.context.fillText(text, point.x, point.y + size*this.view.zoom)
+        this.context.fillText(text, point.x, point.y + size * this.view.zoom)
     }
 
     fillEllipse(pos: Point, dimensions: Point): void {
         pos = pos.plus(this.view.offset).times(this.view.zoom)
         const radiuses = dimensions.times(this.view.zoom).div(2)
 
-        this.context.beginPath();
+        this.context.beginPath()
         this.context.ellipse(
-            pos.x + radiuses.x, pos.y + radiuses.y, 
-            radiuses.x, radiuses.y, 
-            0, 0, 2 * Math.PI
+            pos.x + radiuses.x,
+            pos.y + radiuses.y,
+            radiuses.x,
+            radiuses.y,
+            0,
+            0,
+            2 * Math.PI
         )
-        this.context.fill();
+        this.context.fill()
     }
 
     fillRect(pos: Point, dimensions: Point): void {
@@ -58,22 +77,22 @@ export class RenderContext {
     }
 
     /**
-     * @param source 
-     * @param sourcePosition 
-     * @param sourceDimensions 
+     * @param source
+     * @param sourcePosition
+     * @param sourceDimensions
      * @param destPosition the top left corner where the image will be drawn
-     * @param destDimensions 
+     * @param destDimensions
      * @param rotation (will be mirrored by mirrorX or mirrorY)
-     * @param pixelPerfect 
-     * @param mirrorX 
-     * @param mirrorY 
+     * @param pixelPerfect
+     * @param mirrorX
+     * @param mirrorY
      */
     drawImage(
-        source: CanvasImageSource, 
-        sourcePosition: Point, 
-        sourceDimensions: Point, 
+        source: CanvasImageSource,
+        sourcePosition: Point,
+        sourceDimensions: Point,
         destPosition: Point,
-        destDimensions: Point, 
+        destDimensions: Point,
         rotation: number,
         pixelPerfect: boolean,
         mirrorX: boolean,
@@ -82,39 +101,44 @@ export class RenderContext {
         destDimensions = destDimensions ?? sourceDimensions
         // const mirroredOffset = new Point(mirrorX ? destDimensions.x : 0, mirrorY ? destDimensions.y : 0)
         const offset = this.view.offset.times(this.view.zoom).apply(Math.floor)
-        let scaledDestPosition = destPosition./*plus(mirroredOffset).*/times(this.view.zoom).plus(offset)
+        let scaledDestPosition = destPosition
+            ./*plus(mirroredOffset).*/ times(this.view.zoom)
+            .plus(offset)
         if (pixelPerfect) {
             scaledDestPosition = this.pixelize(scaledDestPosition)
         }
         const scaledDestDimensions = destDimensions.times(this.view.zoom)
 
         const biggestDimension = Math.max(scaledDestDimensions.x, scaledDestDimensions.y) // to make sure things get rendered if rotated at the edge of the screen
-        if (scaledDestPosition.x > this.canvas.width + biggestDimension
-            || scaledDestPosition.x + scaledDestDimensions.x < -biggestDimension
-            || scaledDestPosition.y > this.canvas.height + biggestDimension
-            || scaledDestPosition.y + scaledDestDimensions.y < -biggestDimension) {
+        if (
+            scaledDestPosition.x > this.canvas.width + biggestDimension ||
+            scaledDestPosition.x + scaledDestDimensions.x < -biggestDimension ||
+            scaledDestPosition.y > this.canvas.height + biggestDimension ||
+            scaledDestPosition.y + scaledDestDimensions.y < -biggestDimension
+        ) {
             return
         }
 
         this.context.save()
 
         // Use Math.floor() to prevent tearing between images
-        this.context.translate(
-            Math.floor(scaledDestPosition.x),
-            Math.floor(scaledDestPosition.y)
-        )
+        this.context.translate(Math.floor(scaledDestPosition.x), Math.floor(scaledDestPosition.y))
 
         const rotationTranslate = destDimensions.div(2).times(this.view.zoom)
         this.context.translate(rotationTranslate.x, rotationTranslate.y)
-        this.context.rotate(rotation * Math.PI/180)
+        this.context.rotate((rotation * Math.PI) / 180)
         this.context.scale(mirrorX ? -1 : 1, mirrorY ? -1 : 1)
 
         this.context.drawImage(
-            source, 
-            sourcePosition.x, sourcePosition.y, 
-            sourceDimensions.x, sourceDimensions.y, 
-            -rotationTranslate.x, -rotationTranslate.y,
-            scaledDestDimensions.x, scaledDestDimensions.y
+            source,
+            sourcePosition.x,
+            sourcePosition.y,
+            sourceDimensions.x,
+            sourceDimensions.y,
+            -rotationTranslate.x,
+            -rotationTranslate.y,
+            scaledDestDimensions.x,
+            scaledDestDimensions.y
         )
 
         this.context.restore()

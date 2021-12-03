@@ -1,5 +1,4 @@
 export class Point {
-
     static readonly ZERO = new Point(0, 0)
 
     // relative to top left corner
@@ -20,10 +19,7 @@ export class Point {
     }
 
     floorDiv(denominator: number): Point {
-        return new Point(
-            Math.floor(this.x / denominator), 
-            Math.floor(this.y / denominator)
-        )
+        return new Point(Math.floor(this.x / denominator), Math.floor(this.y / denominator))
     }
 
     plus(other: Point): Point {
@@ -77,8 +73,12 @@ export class Point {
      * Parses a string of the format "(x,y)"
      * Behavior is undefined when the paramter is incorrectly formatted.
      */
-    static fromString(s: string) : Point {
-        const halves = s.replace("(", "").replace(")", "").split(",").map(n => Number.parseInt(n))
+    static fromString(s: string): Point {
+        const halves = s
+            .replace("(", "")
+            .replace(")", "")
+            .split(",")
+            .map((n) => Number.parseInt(n))
         return new Point(halves[0], halves[1])
     }
 
@@ -97,7 +97,9 @@ export class Point {
      *                If omitted, this will be the same as xRandom
      */
     randomlyShifted(xRandom: number, yRandom: number = xRandom) {
-        return this.plus(new Point(xRandom - Math.random() * xRandom * 2, yRandom - Math.random() * yRandom * 2))
+        return this.plus(
+            new Point(xRandom - Math.random() * xRandom * 2, yRandom - Math.random() * yRandom * 2)
+        )
     }
 
     /**

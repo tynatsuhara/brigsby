@@ -7,18 +7,18 @@ import { AbstractType } from "./Types"
  */
 export class Entity {
     components: Component[] = []
-    
+
     private componentCache: Map<object, object> = new Map()
 
     constructor(components: Component[] = []) {
-        components.forEach(c => this.addComponent(c))
+        components.forEach((c) => this.addComponent(c))
     }
 
     addComponent<T extends Component>(component: T): T {
         if (!component) {
             return
         }
-        
+
         this.componentCache.clear()
 
         component.entity = this
@@ -28,7 +28,7 @@ export class Entity {
     }
 
     addComponents<T extends Component>(components: T[]): T[] {
-        components.forEach(e => this.addComponent(e))
+        components.forEach((e) => this.addComponent(e))
         return components
     }
 
@@ -42,22 +42,22 @@ export class Entity {
     }
 
     getComponents<T extends Component>(componentType: AbstractType<T>): T[] {
-        return this.components.filter(c => c instanceof componentType).map(c => c as T)
+        return this.components.filter((c) => c instanceof componentType).map((c) => c as T)
     }
 
     removeComponent(component: Component) {
         this.componentCache.clear()
-        
-        this.components = this.components.filter(c => c !== component)
+
+        this.components = this.components.filter((c) => c !== component)
         component.entity = null
     }
 
     /**
-     * Disables and removes all components. 
+     * Disables and removes all components.
      * Passing a self-destructed entity to the engine will have no effects.
      */
     selfDestruct() {
-        this.components.forEach(c => c.delete())
+        this.components.forEach((c) => c.delete())
     }
 }
 

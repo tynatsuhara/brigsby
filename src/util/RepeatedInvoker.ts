@@ -6,7 +6,6 @@ import { UpdateData } from "../Engine"
  * The invoked function runs in the update() step.
  */
 export class RepeatedInvoker extends Component {
-
     private fn: (updateData: UpdateData) => number
     private delay: number
 

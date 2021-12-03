@@ -15,7 +15,7 @@ class Profiler {
     private tracked = new Map<string, [MovingAverage, (number) => string]>()
 
     updateEngineTickStats(
-        msSinceLastUpdate: number, 
+        msSinceLastUpdate: number,
         msForUpdate: number,
         msForRender: number,
         msForLateUpdate: number,
@@ -39,30 +39,41 @@ class Profiler {
 
     getView(): View {
         const s = [
-            `FPS: ${round(1000/this.fpsTracker.get())} (${round(this.fpsTracker.get())} ms per frame)`,
+            `FPS: ${round(1000 / this.fpsTracker.get())} (${round(
+                this.fpsTracker.get()
+            )} ms per frame)`,
             `update() duration ms: ${round(this.updateTracker.get(), 2)}`,
             `render() duration ms: ${round(this.renderTracker.get(), 2)}`,
             `lateUpdate() duration ms: ${round(this.lateUpdateTracker.get(), 2)}`,
             `components updated: ${this.componentsUpdated}`,
-            ...Array.from(this.tracked.values()).map((v => v[1](v[0].get())))
+            ...Array.from(this.tracked.values()).map((v) => v[1](v[0].get())),
         ]
         return {
-            entities: [new Entity(s.map((str, i) => new BasicRenderComponent(new TextRender(str, new Point(60, 70 + 25 * i)))))],
+            entities: [
+                new Entity(
+                    s.map(
+                        (str, i) =>
+                            new BasicRenderComponent(
+                                new TextRender(str, new Point(60, 70 + 25 * i))
+                            )
+                    )
+                ),
+            ],
             zoom: 1,
-            offset: Point.ZERO
+            offset: Point.ZERO,
         }
     }
 }
 
-const round = (val, pow=0) => {
+const round = (val, pow = 0) => {
     const decimals = Math.pow(10, pow)
-    return Math.round(val * decimals)/decimals
+    return Math.round(val * decimals) / decimals
 }
 
 class MovingAverage {
     pts: [number, number][] = []
     sum = 0
-    lifetime = 1  // in seconds
+    lifetime = 1 // in seconds
 
     record(val: number) {
         const now = new Date().getTime()
@@ -76,7 +87,7 @@ class MovingAverage {
     }
 
     get(): number {
-        return this.sum/this.pts.length
+        return this.sum / this.pts.length
     }
 }
 

@@ -5,13 +5,13 @@ import { Lists } from "./Lists"
 // an infinite grid using x/y coordinates (x increases to the right, y increases down)
 export class Grid<T> {
     private map: { [key: string]: T } = {}
-    private _valuesCache: T[]  // calling Object.values() repeatedly is expensive
-    
+    private _valuesCache: T[] // calling Object.values() repeatedly is expensive
+
     set(pt: Point, entry: T) {
         this._valuesCache = null
         this.map[pt.toString()] = entry
     }
-    
+
     /**
      * @returns the element at the point or null if not present in the grid
      */
@@ -27,8 +27,8 @@ export class Grid<T> {
     removeAll(element: T) {
         this._valuesCache = null
         Object.entries(this.map)
-                .filter(kv => kv[1] === element)
-                .forEach(kv => delete this.map[kv[0]])
+            .filter((kv) => kv[1] === element)
+            .forEach((kv) => delete this.map[kv[0]])
     }
 
     clear() {
@@ -40,16 +40,16 @@ export class Grid<T> {
      * This requires parsing all keys and can be expensive if done frequently
      */
     entries(): [Point, T][] {
-        return Object.entries(this.map).map(tuple => [Point.fromString(tuple[0]), tuple[1]])
+        return Object.entries(this.map).map((tuple) => [Point.fromString(tuple[0]), tuple[1]])
     }
 
     /**
      * This requires parsing all keys and can be expensive if done frequently
      */
     keys(): Point[] {
-        return Object.keys(this.map).map(ptStr => Point.fromString(ptStr))
+        return Object.keys(this.map).map((ptStr) => Point.fromString(ptStr))
     }
-    
+
     /**
      * @returns a set of all unique values in the grid
      */
@@ -64,13 +64,18 @@ export class Grid<T> {
      * Returns a path inclusive of start and end
      */
     findPath(
-        start: Point, 
-        end: Point, 
+        start: Point,
+        end: Point,
         {
-            heuristic = pt => pt.manhattanDistanceTo(end),
+            heuristic = (pt) => pt.manhattanDistanceTo(end),
             distance = (a, b) => a.manhattanDistanceTo(b),
-            isOccupied = pt => !!this.get(pt),
-            getNeighbors = pt => [new Point(pt.x, pt.y - 1), new Point(pt.x - 1, pt.y), new Point(pt.x + 1, pt.y), new Point(pt.x, pt.y + 1)],
+            isOccupied = (pt) => !!this.get(pt),
+            getNeighbors = (pt) => [
+                new Point(pt.x, pt.y - 1),
+                new Point(pt.x - 1, pt.y),
+                new Point(pt.x + 1, pt.y),
+                new Point(pt.x, pt.y + 1),
+            ],
             shortCircuit = Number.MAX_SAFE_INTEGER,
         }: {
             heuristic?: (pt: Point) => number
@@ -86,17 +91,25 @@ export class Grid<T> {
             return null
         }
 
-        return this.findPathInternal(start, end, heuristic, distance, isOccupied, getNeighbors, shortCircuit)
+        return this.findPathInternal(
+            start,
+            end,
+            heuristic,
+            distance,
+            isOccupied,
+            getNeighbors,
+            shortCircuit
+        )
     }
 
     private findPathInternal(
-        start: Point, 
-        end: Point, 
+        start: Point,
+        end: Point,
         heuristic: (pt: Point) => number,
         distance: (a: Point, b: Point) => number,
         isOccupied: (pt: Point) => boolean,
         getNeighbors: (pt: Point) => Point[],
-        shortCircuit: number,
+        shortCircuit: number
     ): Point[] {
         const gScore = new Map<string, number>()
         gScore.set(start.toString(), 0)
@@ -106,7 +119,7 @@ export class Grid<T> {
 
         const cameFrom = new Map<string, Point>()
         const openSetUnique = new Set<string>()
-        const openSet = new BinaryHeap<Point>(p => fScore.get(p.toString()))
+        const openSet = new BinaryHeap<Point>((p) => fScore.get(p.toString()))
         openSet.push(start)
 
         while (openSet.size() > 0) {
@@ -124,9 +137,11 @@ export class Grid<T> {
             }
 
             const currentGScore = gScore.get(current.toString())
-            
-            const neighbors = getNeighbors(current).filter(pt => !isOccupied(pt) && !pt.equals(start))
-            
+
+            const neighbors = getNeighbors(current).filter(
+                (pt) => !isOccupied(pt) && !pt.equals(start)
+            )
+
             for (const neighbor of neighbors) {
                 const n = neighbor.toString()
                 const tentativeGScore = currentGScore + distance(current, neighbor)
@@ -151,7 +166,7 @@ export class Grid<T> {
     }
 
     /**
-     * Returns a copy of the grid where the contents are 
+     * Returns a copy of the grid where the contents are
      * repositioned with the top left starting at (0, 0)
      */
     normalized(): Grid<T> {
@@ -160,8 +175,8 @@ export class Grid<T> {
         if (entries.length === 0) {
             return result
         }
-        const minX = Math.min(...entries.map(entry => entry[0].x))
-        const minY = Math.min(...entries.map(entry => entry[0].y))
+        const minX = Math.min(...entries.map((entry) => entry[0].x))
+        const minY = Math.min(...entries.map((entry) => entry[0].y))
         const shift = new Point(-minX, -minY)
         for (const entry of entries) {
             result.set(entry[0].plus(shift), entry[1])

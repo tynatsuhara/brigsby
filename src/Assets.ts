@@ -2,12 +2,11 @@
  * A class used for pre-loading and caching assets.
  */
 class Assets {
-    
     private readonly imageMap = new Map<string, HTMLImageElement>()
     private readonly audioMap = new Map<string, string>()
 
     /**
-     * returns a promise to load a font already added to the default set of the page 
+     * returns a promise to load a font already added to the default set of the page
      * (eg via a stylesheet or <link> tag)
      * @param font a quote-wrapped font specification using CSS value syntax, eg '"italic bold 16px Roboto"'
      */
@@ -20,14 +19,17 @@ class Assets {
     }
 
     loadImageFiles(relativePaths: string[]): Promise<void[]> {
-        const promises = relativePaths.map(path => new Promise<void>(resolve => {
-            const loadingImage = new Image()
-            loadingImage.onload = () => {
-                this.imageMap.set(path, loadingImage)
-                resolve()
-            }
-            loadingImage.src = path
-        }))
+        const promises = relativePaths.map(
+            (path) =>
+                new Promise<void>((resolve) => {
+                    const loadingImage = new Image()
+                    loadingImage.onload = () => {
+                        this.imageMap.set(path, loadingImage)
+                        resolve()
+                    }
+                    loadingImage.src = path
+                })
+        )
 
         return Promise.all(promises)
     }
@@ -38,17 +40,22 @@ class Assets {
     getImageByFileName = (fileName: string) => this.imageMap.get(fileName)
 
     loadAudioFiles(relativePaths: string[]): Promise<void[]> {
-        const promises = relativePaths.map(path => new Promise<void>(resolve => {
-            if (this.audioMap.has(path)) {
-                resolve()
-            } else {
-                fetch(path).then(response => response.blob()).then(blob => {
-                    const audioBlob = URL.createObjectURL(blob)
-                    this.audioMap.set(path, audioBlob)
-                    resolve()
+        const promises = relativePaths.map(
+            (path) =>
+                new Promise<void>((resolve) => {
+                    if (this.audioMap.has(path)) {
+                        resolve()
+                    } else {
+                        fetch(path)
+                            .then((response) => response.blob())
+                            .then((blob) => {
+                                const audioBlob = URL.createObjectURL(blob)
+                                this.audioMap.set(path, audioBlob)
+                                resolve()
+                            })
+                    }
                 })
-            }
-        }))
+        )
 
         return Promise.all(promises)
     }
