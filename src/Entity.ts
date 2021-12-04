@@ -8,7 +8,7 @@ import { AbstractType } from "./Types"
 export class Entity {
     components: Component[] = []
 
-    private componentCache: Map<object, object> = new Map()
+    private componentCache: Map<object, object[]> = new Map()
 
     constructor(components: Component[] = []) {
         components.forEach((c) => this.addComponent(c))
@@ -32,17 +32,17 @@ export class Entity {
         return components
     }
 
-    getComponent<T extends Component>(componentType: AbstractType<T>): T {
-        let value = this.componentCache.get(componentType)
-        if (!value || value === NO_COMPONENT) {
-            value = this.getComponents(componentType)[0]
-            this.componentCache.set(componentType, value ?? NO_COMPONENT)
-        }
-        return value as T
+    getComponent<T extends Component>(componentType: AbstractType<T>): T | undefined {
+        return this.getComponents(componentType)[0]
     }
 
     getComponents<T extends Component>(componentType: AbstractType<T>): T[] {
-        return this.components.filter((c) => c instanceof componentType).map((c) => c as T)
+        let value = this.componentCache.get(componentType)
+        if (value === undefined) {
+            value = this.components.filter((c) => c instanceof componentType)
+            this.componentCache.set(componentType, value)
+        }
+        return value as T[]
     }
 
     removeComponent(component: Component) {
@@ -60,5 +60,3 @@ export class Entity {
         this.components.forEach((c) => c.delete())
     }
 }
-
-const NO_COMPONENT = {}
