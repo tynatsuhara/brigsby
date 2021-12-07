@@ -126,8 +126,6 @@ export class Input {
     }
 
     captureInput(): CapturedInput {
-        console.log()
-
         const keys = Array.from(this.keys)
         this.lastCapture = new CapturedInput(
             new Set(keys.filter((key) => !this.lastCapture.isKeyHeld(key as InputKey))),
