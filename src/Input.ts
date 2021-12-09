@@ -1,6 +1,12 @@
 import { Point } from "./Point"
 import { View } from "./View"
 
+export enum ButtonState {
+    DOWN,
+    HELD,
+    UP,
+}
+
 // enum referencing event.code
 export enum InputKey {
     ZERO = "Digit0",
@@ -76,10 +82,34 @@ export const InputKeyString = {
     },
 }
 
-const enum MouseButton {
+// enum referencing standard gamepad indexes https://w3c.github.io/gamepad/#remapping
+export enum GamepadButton {
+    X,
+    CIRCLE,
+    SQUARE,
+    TRIANGLE,
+    L1,
+    R1,
+    L2,
+    R2,
+    SELECT,
+    START,
+    L3,
+    R3,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    SUPER,
+    TOUCHPAD,
+}
+
+export enum MouseButton {
     LEFT = 0,
     RIGHT = 2,
 }
+
+// TODO: Add globally-configured deadzones
 
 export class Input {
     private readonly keys: Set<string> = new Set()
@@ -127,7 +157,7 @@ export class Input {
 
     captureInput(): CapturedInput {
         const keys = Array.from(this.keys)
-        this.lastCapture = new CapturedInput(
+        const currentInput = new CapturedInput(
             new Set(keys.filter((key) => !this.lastCapture.isKeyHeld(key as InputKey))),
             new Set(keys.slice()),
             new Set(this.lastCapture.getKeysHeld().filter((key) => !this.keys.has(key))),
@@ -138,7 +168,8 @@ export class Input {
             this.isRightMouseDown,
             this.isRightMouseHeld,
             this.isRightMouseUp,
-            this.mouseWheelDeltaY
+            this.mouseWheelDeltaY,
+            this.captureGamepads()
         )
 
         // reset since these should only be true for 1 tick
@@ -147,6 +178,8 @@ export class Input {
         this.isRightMouseDown = false
         this.isRightMouseUp = false
         this.mouseWheelDeltaY = 0
+
+        this.lastCapture = currentInput
 
         return this.lastCapture
     }
@@ -157,6 +190,83 @@ export class Input {
             e.preventDefault()
         }
         return e
+    }
+
+    private captureGamepads() {
+        return Object.values(navigator.getGamepads() || []).map((pad, gamepadIndex) => {
+            if (!pad) {
+                return undefined
+            }
+            const buttonValues = new Map<GamepadButton, number>()
+            pad.buttons.forEach((b, i) => buttonValues.set(i, b.value))
+            const lastGamepadCapture = this.lastCapture.gamepads[gamepadIndex]
+            return new CapturedGamepad(pad, buttonValues, lastGamepadCapture)
+        })
+    }
+}
+
+class CapturedGamepad {
+    private readonly gamepad: Gamepad
+    private readonly lastValues: Map<GamepadButton, number>
+    private readonly buttonValues: Map<GamepadButton, number>
+
+    constructor(
+        gamepad: Gamepad,
+        buttonValues: Map<GamepadButton, number>,
+        lastCapture?: CapturedGamepad
+    ) {
+        this.gamepad = gamepad
+        this.buttonValues = buttonValues
+        this.lastValues = lastCapture?.buttonValues || new Map()
+    }
+
+    getLeftAxes() {
+        return new Point(this.gamepad.axes[0], this.gamepad.axes[1])
+    }
+
+    getRightAxes() {
+        return new Point(this.gamepad.axes[2], this.gamepad.axes[3])
+    }
+
+    isButtonDown(button: GamepadButton) {
+        return !!(!this.lastValues.get(button) && this.buttonValues.get(button))
+    }
+
+    isButtonHeld(button: GamepadButton) {
+        return !!this.buttonValues.get(button)
+    }
+
+    isButtonUp(button: GamepadButton) {
+        return !!this.lastValues.get(button) && !this.buttonValues.get(button)
+    }
+
+    isButton(button: GamepadButton, state: ButtonState) {
+        switch (state) {
+            case ButtonState.DOWN:
+                return this.isButtonDown(button)
+            case ButtonState.HELD:
+                return this.isButtonHeld(button)
+            case ButtonState.UP:
+                return this.isButtonUp(button)
+        }
+    }
+
+    getButtonValue(button: GamepadButton) {
+        return this.buttonValues.get(button)
+    }
+
+    vibrate(
+        effectType: string = "dual-rumble",
+        options: object = {
+            duration: 1000,
+            strongMagnitude: 1.0,
+            weakMagnitude: 1.0,
+        }
+    ) {
+        const vibrator = this.gamepad["vibrationActuator"]
+        if (vibrator && typeof vibrator["playEffect"] === "function") {
+            vibrator.playEffect(effectType, options)
+        }
     }
 }
 
@@ -172,6 +282,7 @@ export class CapturedInput {
     readonly isRightMouseHeld: boolean
     readonly isRightMouseUp: boolean
     readonly mouseWheelDeltaY: number
+    readonly gamepads: CapturedGamepad[]
 
     constructor(
         keysDown: Set<string> = new Set(),
@@ -184,7 +295,8 @@ export class CapturedInput {
         isRightMouseDown: boolean = false,
         isRightMouseHeld: boolean = false,
         isRightMouseUp: boolean = false,
-        mouseWheelDeltaY: number = 0
+        mouseWheelDeltaY: number = 0,
+        gamepads: CapturedGamepad[] = []
     ) {
         this.keysDown = keysDown
         this.keysHeld = keysHeld
@@ -197,6 +309,7 @@ export class CapturedInput {
         this.isRightMouseHeld = isRightMouseHeld
         this.isRightMouseUp = isRightMouseUp
         this.mouseWheelDeltaY = mouseWheelDeltaY
+        this.gamepads = gamepads
     }
 
     scaledForView(view: View): CapturedInput {
@@ -211,8 +324,32 @@ export class CapturedInput {
             this.isRightMouseDown,
             this.isRightMouseHeld,
             this.isRightMouseUp,
-            this.mouseWheelDeltaY
+            this.mouseWheelDeltaY,
+            this.gamepads
         )
+    }
+
+    isMouse(button: MouseButton, state: ButtonState) {
+        // TODO: Make this more dynamic and support more mouse buttons
+        if (button === MouseButton.LEFT) {
+            switch (state) {
+                case ButtonState.DOWN:
+                    return this.isMouseDown
+                case ButtonState.HELD:
+                    return this.isMouseHeld
+                case ButtonState.UP:
+                    return this.isMouseUp
+            }
+        } else {
+            switch (state) {
+                case ButtonState.DOWN:
+                    return this.isRightMouseDown
+                case ButtonState.HELD:
+                    return this.isRightMouseHeld
+                case ButtonState.UP:
+                    return this.isRightMouseUp
+            }
+        }
     }
 
     getKeysHeld(): string[] {
@@ -229,5 +366,16 @@ export class CapturedInput {
 
     isKeyUp(key: InputKey): boolean {
         return this.keysUp.has(key)
+    }
+
+    isKey(key: InputKey, state: ButtonState) {
+        switch (state) {
+            case ButtonState.DOWN:
+                return this.isKeyDown(key)
+            case ButtonState.HELD:
+                return this.isKeyHeld(key)
+            case ButtonState.UP:
+                return this.isKeyUp(key)
+        }
     }
 }
