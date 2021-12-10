@@ -1,6 +1,6 @@
 import { Point } from "../Point"
-import { RenderMethod } from "./RenderMethod"
 import { RenderContext } from "./RenderContext"
+import { RenderMethod } from "./RenderMethod"
 
 export class ImageRender extends RenderMethod {
     source: CanvasImageSource
@@ -25,11 +25,13 @@ export class ImageRender extends RenderMethod {
     ) {
         super(depth)
         this.source = source
-        ;(this.sourcePosition = sourcePosition), (this.sourceDimensions = sourceDimensions)
+        this.sourcePosition = sourcePosition
+        this.sourceDimensions = sourceDimensions
         this.position = position
         this.dimensions = dimensions
         this.rotation = rotation
-        ;(this.mirrorX = mirrorX), (this.mirrorY = mirrorY)
+        this.mirrorX = mirrorX
+        this.mirrorY = mirrorY
     }
 
     render(context: RenderContext) {

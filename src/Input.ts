@@ -104,6 +104,12 @@ export enum GamepadButton {
     TOUCHPAD,
 }
 
+export type GamepadVibrationOptions = {
+    duration?: number
+    strongMagnitude?: number
+    weakMagnitude?: number
+}
+
 export enum MouseButton {
     LEFT = 0,
     RIGHT = 2,
@@ -162,6 +168,7 @@ export class Input {
             new Set(keys.slice()),
             new Set(this.lastCapture.getKeysHeld().filter((key) => !this.keys.has(key))),
             this.mousePos,
+            this.mousePos.minus(this.lastCapture.mousePos),
             this.isMouseDown,
             this.isMouseHeld,
             this.isMouseUp,
@@ -205,7 +212,7 @@ export class Input {
     }
 }
 
-class CapturedGamepad {
+export class CapturedGamepad {
     private readonly gamepad: Gamepad
     private readonly lastValues: Map<GamepadButton, number>
     private readonly buttonValues: Map<GamepadButton, number>
@@ -255,17 +262,20 @@ class CapturedGamepad {
         return this.buttonValues.get(button)
     }
 
-    vibrate(
-        effectType: string = "dual-rumble",
-        options: object = {
-            duration: 1000,
-            strongMagnitude: 1.0,
-            weakMagnitude: 1.0,
-        }
-    ) {
+    vibrate({
+        duration = 1000,
+        // TODO verify different magnitudes do anything
+        strongMagnitude = 1.0,
+        weakMagnitude = 1.0,
+    }: GamepadVibrationOptions = {}) {
         const vibrator = this.gamepad["vibrationActuator"]
         if (vibrator && typeof vibrator["playEffect"] === "function") {
-            vibrator.playEffect(effectType, options)
+            // "dual-rumble" is the only effect that is supported currently
+            vibrator.playEffect("dual-rumble", {
+                duration,
+                strongMagnitude,
+                weakMagnitude,
+            })
         }
     }
 }
@@ -275,6 +285,7 @@ export class CapturedInput {
     private readonly keysHeld: Set<string>
     private readonly keysUp: Set<string>
     readonly mousePos: Point = new Point(0, 0)
+    readonly mousePosDelta: Point
     readonly isMouseDown: boolean
     readonly isMouseHeld: boolean
     readonly isMouseUp: boolean
@@ -289,6 +300,7 @@ export class CapturedInput {
         keysHeld: Set<string> = new Set(),
         keysUp: Set<string> = new Set(),
         mousePos: Point = new Point(0, 0),
+        mousePosDelta: Point = new Point(0, 0),
         isMouseDown: boolean = false,
         isMouseHeld: boolean = false,
         isMouseUp: boolean = false,
@@ -302,6 +314,7 @@ export class CapturedInput {
         this.keysHeld = keysHeld
         this.keysUp = keysUp
         this.mousePos = mousePos
+        this.mousePosDelta = mousePosDelta
         this.isMouseDown = isMouseDown
         this.isMouseHeld = isMouseHeld
         this.isMouseUp = isMouseUp
@@ -318,6 +331,7 @@ export class CapturedInput {
             this.keysHeld,
             this.keysUp,
             this.mousePos.div(view.zoom).minus(view.offset),
+            this.mousePosDelta,
             this.isMouseDown,
             this.isMouseHeld,
             this.isMouseUp,
