@@ -95,4 +95,24 @@ export const Lists = {
 
         return Lists.maxBy(Array.from(freq.entries()), (kv) => kv[1])[0]
     },
+
+    /**
+     * Equivalent to Array.prototype.find() except that it starts searching at a random index
+     */
+    findRandom<T>(list: T[], callbackFn: (val: T, index?: number, array?: T[]) => boolean): T {
+        if (!list?.length) {
+            return undefined
+        }
+        let startIndex = Math.floor(Math.random() * list.length)
+        for (let i = startIndex; i < list.length; i++) {
+            if (callbackFn(list[i], i, list)) {
+                return list[i]
+            }
+        }
+        for (let i = 0; i < startIndex; i++) {
+            if (callbackFn(list[i], i, list)) {
+                return list[i]
+            }
+        }
+    },
 }
