@@ -8,11 +8,12 @@ class Assets {
     /**
      * returns a promise to load a font already added to the default set of the page
      * (eg via a stylesheet or <link> tag)
-     * @param font a quote-wrapped font specification using CSS value syntax, eg '"italic bold 16px Roboto"'
+     * @param font a quote-wrapped font specification using CSS value syntax, eg 'italic bold 16px Roboto'
+     *             It should not contain any surrounding quotes!
      */
     async loadFont(font: string, src: string): Promise<void> {
-        if (!font.startsWith('"') || !font.endsWith('"')) {
-            throw new Error("font names must include quotes")
+        if (navigator.userAgent.match(/Firefox/)) {
+            font = `"${font}"`
         }
         const ff = await new FontFace(font, src).load()
         document["fonts"].add(ff)
