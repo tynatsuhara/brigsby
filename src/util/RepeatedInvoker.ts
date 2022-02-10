@@ -28,3 +28,11 @@ export class RepeatedInvoker extends Component {
         }
     }
 }
+
+export class LateRepeatedInvoker extends RepeatedInvoker {
+    constructor(fn: (updateData: UpdateData, execution: number) => number, initialDelay = 0) {
+        super(fn, initialDelay)
+        this.lateUpdate = this.update
+        this.update = () => {}
+    }
+}
