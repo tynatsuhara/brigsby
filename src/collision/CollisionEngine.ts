@@ -1,5 +1,4 @@
 import { Point } from "../Point"
-import { Maths } from "../util/Maths"
 import { View } from "../View"
 import { BoxCollider } from "./BoxCollider"
 import { Collider } from "./Collider"
@@ -97,10 +96,10 @@ export class CollisionEngine {
             // && !isAlreadyColliding
             return (
                 willCollide &&
-                (bc.position.x > obc.position.x + obc.dimensions.x ||
-                    bc.position.y > obc.position.y + obc.dimensions.y ||
-                    bc.position.x + bc.dimensions.x < obc.position.x ||
-                    bc.position.y + bc.dimensions.y < obc.position.y)
+                (bc.position.x >= obc.position.x + obc.dimensions.x ||
+                    bc.position.y >= obc.position.y + obc.dimensions.y ||
+                    bc.position.x + bc.dimensions.x <= obc.position.x ||
+                    bc.position.y + bc.dimensions.y <= obc.position.y)
             )
         })
     }
