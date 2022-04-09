@@ -11,11 +11,11 @@ class Assets {
      * @param font a quote-wrapped font specification using CSS value syntax, eg 'italic bold 16px Roboto'
      *             It should not contain any surrounding quotes!
      */
-    async loadFont(font: string, src: string): Promise<void> {
+    async loadFont(font: string, src: string, descriptors?: FontFaceDescriptors): Promise<void> {
         if (navigator.userAgent.match(/Firefox/)) {
             font = `"${font}"`
         }
-        const ff = await new FontFace(font, src).load()
+        const ff = await new FontFace(font, src, descriptors).load()
         document["fonts"].add(ff)
     }
 
