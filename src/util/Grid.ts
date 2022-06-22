@@ -1,6 +1,5 @@
 import { Point } from "../Point"
 import { BinaryHeap } from "./BinaryHeap"
-import { Lists } from "./Lists"
 
 // an infinite grid using x/y coordinates (x increases to the right, y increases down)
 export class Grid<T> {
@@ -61,7 +60,7 @@ export class Grid<T> {
     }
 
     /**
-     * Returns a path inclusive of start and end
+     * @returns a path inclusive of start and end
      */
     findPath(
         start: Point,
@@ -186,6 +185,53 @@ export class Grid<T> {
 
     serialize(): { [key: string]: T } {
         return this.map
+    }
+
+    /**
+     * Searches for something that matches the filter in a square clockwise spiral pattern
+     *  --->
+     * ^    |
+     * |    v
+     *  <---
+     * @param center the center point
+     * @returns the first point matching the filter, searching outward
+     */
+    static spiralSearch(
+        center: Point,
+        filter: (pt: Point) => boolean,
+        range: number = 100
+    ): Point | undefined {
+        for (let i = 1; i < range; i++) {
+            const top = center.y - i
+            const right = center.x + i
+            const bottom = center.y + i
+            const left = center.x - i
+
+            // top
+            for (let x = left; x < right; x++) {
+                if (filter(new Point(x, top))) {
+                    return new Point(x, top)
+                }
+            }
+            // right
+            for (let y = top; y < bottom; y++) {
+                if (filter(new Point(right, y))) {
+                    return new Point(right, y)
+                }
+            }
+            // bottom
+            for (let x = right; x > left; x--) {
+                if (filter(new Point(x, top))) {
+                    return new Point(x, top)
+                }
+            }
+            // left
+            for (let y = bottom; y > top; y--) {
+                if (filter(new Point(left, y))) {
+                    return new Point(left, y)
+                }
+            }
+        }
     }
 
     static deserialize<T>(map: { [key: string]: T }): Grid<T> {
