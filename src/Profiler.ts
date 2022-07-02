@@ -1,11 +1,10 @@
-import { View } from "./View"
 import { Entity } from "./Entity"
 import { Point } from "./Point"
-import { TextRender } from "./renderer/TextRender"
-import { Component } from "./Component"
 import { BasicRenderComponent } from "./renderer/BasicRenderComponent"
+import { TextRender } from "./renderer/TextRender"
+import { View } from "./View"
 
-class Profiler {
+export class Profiler {
     private fpsTracker = new MovingAverage()
     private updateTracker = new MovingAverage()
     private renderTracker = new MovingAverage()

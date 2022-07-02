@@ -1,7 +1,7 @@
 /**
  * A class used for pre-loading and caching assets.
  */
-class Assets {
+export class Assets {
     private readonly imageMap = new Map<string, HTMLImageElement>()
     private readonly audioMap = new Map<string, string>()
 

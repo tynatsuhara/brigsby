@@ -2,7 +2,7 @@ import { Point } from "../Point"
 import { View } from "../View"
 import { RenderContext } from "./RenderContext"
 
-class Renderer {
+export class Renderer {
     private canvas: HTMLCanvasElement
     private context: CanvasRenderingContext2D
 
