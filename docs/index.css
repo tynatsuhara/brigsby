@@ -33,7 +33,7 @@ h1 {
 }
 
 #header {
-    padding-bottom: 30px;
+    padding-bottom: 18px;
 }
 
 #header span {
@@ -44,11 +44,12 @@ h1 {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
+    flex-wrap: wrap;
 }
 
 .entry {
-    margin-bottom: 10px;
     display: inline-block;
+    padding: 12px;
 }
 
 #canvas-card {
@@ -66,4 +67,8 @@ h1 {
 a {
     color: #f9a875;
     text-decoration: none;
+}
+
+a .fab {
+    color: #fff6d3;
 }
