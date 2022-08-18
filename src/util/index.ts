@@ -1,10 +1,8 @@
-import { Animator } from "./Animator"
-import { BinaryHeap } from "./BinaryHeap"
-import { Comparators } from "./Comparators"
-import { Grid } from "./Grid"
-import { Lists } from "./Lists"
-import { Maths } from "./Maths"
-import { Noise } from "./Noise"
-import { RepeatedInvoker } from "./RepeatedInvoker"
-
-export { Animator, BinaryHeap, Comparators, Grid, Lists, Maths, Noise, RepeatedInvoker }
+export { Animator } from "./Animator"
+export { BinaryHeap } from "./BinaryHeap"
+export { Comparators } from "./Comparators"
+export { Grid } from "./Grid"
+export { Lists } from "./Lists"
+export { Maths } from "./Maths"
+export { Noise } from "./Noise"
+export { RepeatedInvoker } from "./RepeatedInvoker"

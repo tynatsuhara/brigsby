@@ -1,8 +1,10 @@
 import { Point } from "../Point"
 import { ImageRender } from "../renderer/ImageRender"
-import { SpriteTransform } from "./SpriteTransform"
 import { SpriteComponent } from "./SpriteComponent"
 import { SpriteSource } from "./SpriteSource"
+import { SpriteTransform } from "./SpriteTransform"
+
+export type ImageFilter = (img: ImageData) => ImageData
 
 export class StaticSpriteSource implements SpriteSource {
     readonly image: CanvasImageSource

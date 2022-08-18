@@ -1,5 +1,3 @@
-import { BoxCollider } from "./BoxCollider"
-import { Collider } from "./Collider"
-import { collisionEngine, CollisionEngine } from "./CollisionEngine"
-
-export { collisionEngine, BoxCollider, Collider, CollisionEngine }
+export * from "./BoxCollider"
+export * from "./Collider"
+export * from "./CollisionEngine"

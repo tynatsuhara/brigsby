@@ -1,7 +1,7 @@
 import { UpdateData } from "../Engine"
 import { Animator } from "../util/Animator"
-import { SpriteComponent } from "./SpriteComponent"
 import { SpriteAnimation } from "./SpriteAnimation"
+import { SpriteComponent } from "./SpriteComponent"
 import { SpriteTransform } from "./SpriteTransform"
 
 export class AnimatedSpriteComponent extends SpriteComponent {

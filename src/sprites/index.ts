@@ -1,17 +1,7 @@
-import { AnimatedSpriteComponent } from "./AnimatedSpriteComponent"
-import { NineSlice } from "./NineSlice"
-import { SpriteAnimation } from "./SpriteAnimation"
-import { SpriteComponent } from "./SpriteComponent"
-import { SpriteSource } from "./SpriteSource"
-import { SpriteTransform } from "./SpriteTransform"
-import { StaticSpriteSource } from "./StaticSpriteSource"
-
-export {
-    AnimatedSpriteComponent,
-    NineSlice,
-    SpriteAnimation,
-    SpriteComponent,
-    SpriteSource,
-    SpriteTransform,
-    StaticSpriteSource,
-}
+export * from "./AnimatedSpriteComponent"
+export * from "./NineSlice"
+export * from "./SpriteAnimation"
+export * from "./SpriteComponent"
+export * from "./SpriteSource"
+export * from "./SpriteTransform"
+export * from "./StaticSpriteSource"
