@@ -1,5 +1,7 @@
 // Borrowed from https://github.com/adnanlah/rotsprite-webgl :)
 
+import { debug } from "../Debug"
+
 let vshader = `
 	attribute vec4 position;
 	attribute vec2 texCoord;
@@ -102,7 +104,11 @@ export const rotSpriteWebGL = (image: ImageData, DEGREE: number): HTMLCanvasElem
         throw new Error("No program")
     }
 
-    console.log("MAX_TEXTURE_SIZE is: ", gl.getParameter(gl.MAX_TEXTURE_SIZE))
+    const startTime = new Date().getTime()
+
+    if (debug.spriteRotateDebug) {
+        console.log("MAX_TEXTURE_SIZE is: ", gl.getParameter(gl.MAX_TEXTURE_SIZE))
+    }
 
     // Locations
     const resolution = gl.getUniformLocation(program, "resolution")
@@ -285,6 +291,10 @@ export const rotSpriteWebGL = (image: ImageData, DEGREE: number): HTMLCanvasElem
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, N)
 
+    if (debug.spriteRotateDebug) {
+        console.log(`sprite rotation took ${new Date().getTime() - startTime} milliseconds`)
+    }
+
     // export image data
     return gl.canvas
 }
@@ -309,9 +319,11 @@ const compile = (gl: WebGLRenderingContext, vshader: string, fshader: string) =>
         gl.linkProgram(program)
         gl.useProgram(program)
 
-        console.log("vertex shader: ", gl.getShaderInfoLog(vs) || "OK")
-        console.log("fragment shader: ", gl.getShaderInfoLog(fs) || "OK")
-        console.log("program: ", gl.getProgramInfoLog(program) || "OK")
+        if (debug.spriteRotateDebug) {
+            console.log("vertex shader: ", gl.getShaderInfoLog(vs) || "OK")
+            console.log("fragment shader: ", gl.getShaderInfoLog(fs) || "OK")
+            console.log("program: ", gl.getProgramInfoLog(program) || "OK")
+        }
     }
 
     return program
