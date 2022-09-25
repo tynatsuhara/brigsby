@@ -1,7 +1,7 @@
-import { StaticSpriteSource } from "./StaticSpriteSource"
-import { SpriteSource } from "./SpriteSource"
-import { SpriteTransform } from "./SpriteTransform"
 import { AnimatedSpriteComponent } from "./AnimatedSpriteComponent"
+import { ImageFilter, SpriteSource } from "./SpriteSource"
+import { SpriteTransform } from "./SpriteTransform"
+import { StaticSpriteSource } from "./StaticSpriteSource"
 
 export class SpriteAnimation implements SpriteSource {
     readonly frames: [StaticSpriteSource, number][] // a list of (source, duration)
@@ -23,7 +23,7 @@ export class SpriteAnimation implements SpriteSource {
         return new AnimatedSpriteComponent([this], transform)
     }
 
-    filtered(filter: (img: ImageData) => ImageData): SpriteAnimation {
+    filtered(filter: ImageFilter): SpriteAnimation {
         return new SpriteAnimation(this.frames.map((f) => [f[0].filtered(filter), f[1]]))
     }
 }

@@ -2,6 +2,7 @@ import { UpdateData } from "../Engine"
 import { Animator } from "../util/Animator"
 import { SpriteAnimation } from "./SpriteAnimation"
 import { SpriteComponent } from "./SpriteComponent"
+import { ImageFilter } from "./SpriteSource"
 import { SpriteTransform } from "./SpriteTransform"
 
 export class AnimatedSpriteComponent extends SpriteComponent {
@@ -56,7 +57,7 @@ export class AnimatedSpriteComponent extends SpriteComponent {
     }
 
     // This won't currently refresh the animation
-    applyFilter(filter: (img: ImageData) => ImageData) {
+    applyFilter(filter: ImageFilter) {
         this.animations = this.animations.map((a) => a?.filtered(filter))
     }
 }

@@ -1,10 +1,9 @@
 import { Point } from "../Point"
 import { ImageRender } from "../renderer/ImageRender"
+import { rotSpriteWebGL } from "./rotSpriteWebGL"
 import { SpriteComponent } from "./SpriteComponent"
-import { SpriteSource } from "./SpriteSource"
+import { ImageFilter, SpriteSource } from "./SpriteSource"
 import { SpriteTransform } from "./SpriteTransform"
-
-export type ImageFilter = (img: ImageData) => ImageData
 
 export class StaticSpriteSource implements SpriteSource {
     readonly image: CanvasImageSource
@@ -13,6 +12,10 @@ export class StaticSpriteSource implements SpriteSource {
 
     /**
      * Constructs a static (non-animated) sprite source
+     *
+     * @param image the source image (which may contain multiple sprites)
+     * @param position the pixel position of the sprite (from the top left)
+     * @param dimensions the dimensions of the sprite
      */
     constructor(image: CanvasImageSource, position: Point, dimensions: Point) {
         this.image = image
@@ -38,7 +41,7 @@ export class StaticSpriteSource implements SpriteSource {
         return new SpriteComponent(this, transform)
     }
 
-    filtered(filter: (img: ImageData) => ImageData): StaticSpriteSource {
+    filtered(filter: ImageFilter): StaticSpriteSource {
         const canvas = document.createElement("canvas")
         canvas.width = this.dimensions.x
         canvas.height = this.dimensions.y
@@ -65,5 +68,26 @@ export class StaticSpriteSource implements SpriteSource {
             Point.ZERO,
             new Point(filtered.width, filtered.height)
         )
+    }
+
+    rotated(degree: number): StaticSpriteSource {
+        // First, draw the necessary subsection of the sprite sheet to get an ImageData
+        const context = document.createElement("canvas").getContext("2d")
+        context.drawImage(
+            this.image,
+            this.position.x,
+            this.position.y,
+            this.dimensions.x,
+            this.dimensions.y,
+            0,
+            0,
+            this.dimensions.x,
+            this.dimensions.y
+        )
+        const image = context.getImageData(0, 0, this.dimensions.x, this.dimensions.y)
+
+        const result = rotSpriteWebGL(image, degree)
+
+        return new StaticSpriteSource(result, Point.ZERO, new Point(result.width, result.height))
     }
 }
