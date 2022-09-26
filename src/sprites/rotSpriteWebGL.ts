@@ -1,4 +1,28 @@
-// Borrowed from https://github.com/adnanlah/rotsprite-webgl :)
+/*
+Original implementation: https://github.com/adnanlah/rotsprite-webgl
+
+MIT License
+
+Copyright (c) 2022 Abdelrahman Adnan Lahrech
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 import { debug } from "../Debug"
 
@@ -92,7 +116,7 @@ let fshader = `
   }
 `
 
-export const rotSpriteWebGL = (image: ImageData, DEGREE: number): HTMLCanvasElement => {
+export const rotSpriteWebGL = (image: ImageData, degree: number): HTMLCanvasElement => {
     const canvas = document.createElement("canvas")
     const SCALE = 8
     const gl = canvas.getContext("webgl", { antialias: false })
@@ -223,8 +247,8 @@ export const rotSpriteWebGL = (image: ImageData, DEGREE: number): HTMLCanvasElem
     // Rotating the image
     gl.uniform1i(isUpscale, 0)
 
-    const cosA = Math.cos((DEGREE * Math.PI) / 180)
-    const sinA = Math.sin((DEGREE * Math.PI) / 180)
+    const cosA = Math.cos((degree * Math.PI) / 180)
+    const sinA = Math.sin((degree * Math.PI) / 180)
 
     const rotCornerX = Math.round((currW / 2) * cosA + (currH / 2) * sinA)
     const rotCornerY = Math.round((currH / 2) * cosA - (currW / 2) * sinA)
