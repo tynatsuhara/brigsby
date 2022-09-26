@@ -1,4 +1,8 @@
-// Original JavaScript Code from  Marijn Haverbeke (http://eloquentjavascript.net/1st_edition/appendix2.html)
+/*
+Original JavaScript implementation by Marijn Haverbeke: http://eloquentjavascript.net/1st_edition/appendix2.html
+Licensed under https://creativecommons.org/licenses/by/3.0/
+The original code has been converted to TypeScript.
+*/
 
 export class BinaryHeap<T> {
     private content: T[] = []
