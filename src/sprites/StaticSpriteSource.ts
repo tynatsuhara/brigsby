@@ -70,6 +70,12 @@ export class StaticSpriteSource implements SpriteSource {
         )
     }
 
+    /**
+     * Generates a new sprite by rotating this sprite clockwise using RotSprite
+     * https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms#RotSprite
+     * This is more expensive than applying rotation with the SpriteTransform, but
+     * gives a "pixel perfect" rotation rather than displaying pixels at an angle.
+     */
     rotated(degree: number): StaticSpriteSource {
         // First, draw the necessary subsection of the sprite sheet to get an ImageData
         const context = document.createElement("canvas").getContext("2d")

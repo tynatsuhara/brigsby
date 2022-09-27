@@ -119,10 +119,13 @@ export class Point {
         return this.plus(new Point(r * Math.cos(a), r * Math.sin(a)))
     }
 
-    rotatedAround(center: Point, angle: number): Point {
+    /**
+     * Returns the point you get by rotating this point clockwise around the given center
+     */
+    rotatedAround(center: Point, degrees: number): Point {
         const { x, y } = this,
             { x: cx, y: cy } = center,
-            radians = (Math.PI / 180) * -angle,
+            radians = (Math.PI / 180) * -degrees,
             cos = Math.cos(radians),
             sin = Math.sin(radians),
             nx = cos * (x - cx) + sin * (y - cy) + cx,
