@@ -118,4 +118,16 @@ export class Point {
         const r = radius * Math.sqrt(Math.random())
         return this.plus(new Point(r * Math.cos(a), r * Math.sin(a)))
     }
+
+    rotatedAround(center: Point, angle: number): Point {
+        const { x, y } = this,
+            { x: cx, y: cy } = center,
+            radians = (Math.PI / 180) * -angle,
+            cos = Math.cos(radians),
+            sin = Math.sin(radians),
+            nx = cos * (x - cx) + sin * (y - cy) + cx,
+            ny = cos * (y - cy) - sin * (x - cx) + cy
+
+        return new Point(nx, ny)
+    }
 }
