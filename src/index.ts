@@ -16,6 +16,6 @@ export {
     InputKeyString,
     MouseButton,
 } from "./Input"
-export { Point } from "./Point"
+export { Point, pt } from "./Point"
 export { profiler } from "./Profiler"
 export type { AbstractType, ConcreteType } from "./Types"
