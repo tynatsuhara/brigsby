@@ -134,3 +134,11 @@ export class Point {
         return new Point(nx, ny)
     }
 }
+
+/**
+ * Shorthand for "new Point(x, y)"
+ * @param x the x value — if y is undefined, this will also be the y value
+ * @param y the y value, or undefined if you want it to match x
+ * @returns a point with the specified values
+ */
+export const pt = (x: number, y?: number) => new Point(x, y ?? x)
