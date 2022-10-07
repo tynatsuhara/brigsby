@@ -33,20 +33,25 @@ export abstract class Collider extends Component {
         this.ignoredColliders = ignoredColliders
     }
 
-    moveTo(point: Point): Point {
+    moveTo(point: Point, allowPartialMove = true): Point {
         if (!this.enabled) {
             this._position = point
             return this.position
         }
         const dx = point.x - this.position.x
         const dy = point.y - this.position.y
+        let madeContact = false
         // TODO: Should these branches be handled by the caller?
         if (collisionEngine._canTranslate(this, new Point(dx, dy))) {
             this._position = point
-        } else if (collisionEngine._canTranslate(this, new Point(dx, 0))) {
-            this._position = this._position.plus(new Point(dx, 0))
-        } else if (collisionEngine._canTranslate(this, new Point(0, dy))) {
-            this._position = this._position.plus(new Point(0, dy))
+        } else if (allowPartialMove) {
+            if (collisionEngine._canTranslate(this, new Point(dx, 0))) {
+                this._position = this._position.plus(new Point(dx, 0))
+                madeContact = true
+            } else if (collisionEngine._canTranslate(this, new Point(0, dy))) {
+                this._position = this._position.plus(new Point(0, dy))
+                madeContact = true
+            }
         }
         return this.position
     }
