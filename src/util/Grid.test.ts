@@ -80,4 +80,22 @@ describe("grid", () => {
         grid.set(pt(2, 2), 2)
         expect(grid.values().length).toEqual(1)
     })
+
+    test("keys set is updated", async () => {
+        const grid = new Grid<number>()
+        grid.set(pt(1, 2), 2)
+        grid.set(pt(2, 2), 3)
+        expect(grid.keys().length).toEqual(2)
+        grid.remove(pt(1, 2))
+        expect(grid.keys().length).toEqual(1)
+    })
+
+    test("values set is updated", async () => {
+        const grid = new Grid<number>()
+        grid.set(pt(1, 2), 2)
+        grid.set(pt(2, 2), 3)
+        expect(grid.values().length).toEqual(2)
+        grid.remove(pt(1, 2))
+        expect(grid.values().length).toEqual(1)
+    })
 })

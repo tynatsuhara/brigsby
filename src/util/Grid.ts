@@ -5,10 +5,13 @@ import { BinaryHeap } from "./BinaryHeap"
 export class Grid<T> {
     // maps x -> y -> value
     private _map: Map<number, Map<number, T>> = new Map()
+
     private _entriesCache: [Point, T][]
+    private _keysCache: Point[]
+    private _valuesCache: T[]
 
     set({ x, y }: Point, entry: T) {
-        this._entriesCache = null
+        this.clearCaches()
         if (!this._map.has(x)) {
             this._map.set(x, new Map())
         }
@@ -23,7 +26,7 @@ export class Grid<T> {
     }
 
     remove({ x, y }: Point) {
-        this._entriesCache = null
+        this.clearCaches()
         const xMap = this._map.get(x)
         if (xMap) {
             xMap.delete(y)
@@ -34,7 +37,7 @@ export class Grid<T> {
     }
 
     removeAll(element: T) {
-        this._entriesCache = null
+        this.clearCaches()
         this.entries().forEach(([point, value]) => {
             if (value === element) {
                 this.remove(point)
@@ -43,7 +46,7 @@ export class Grid<T> {
     }
 
     clear() {
-        this._entriesCache = null
+        this.clearCaches()
         this._map = new Map()
     }
 
@@ -66,33 +69,43 @@ export class Grid<T> {
     }
 
     entries(): [Point, T][] {
-        if (this._entriesCache) {
-            return this._entriesCache
-        }
+        if (!this._entriesCache) {
+            const result: [Point, T][] = []
 
-        const result: [Point, T][] = []
-
-        for (const [x, xMap] of this._map.entries()) {
-            for (const [y, val] of xMap.entries()) {
-                result.push([new Point(x, y), val])
+            for (const [x, xMap] of this._map.entries()) {
+                for (const [y, val] of xMap.entries()) {
+                    result.push([new Point(x, y), val])
+                }
             }
+
+            this._entriesCache = result
         }
 
-        this._entriesCache = result
-
-        return result
+        return this._entriesCache
     }
 
     keys(): Point[] {
-        return this.entries().map(([point, _]) => point)
+        if (!this._keysCache) {
+            this._keysCache = this.entries().map(([point, _]) => point)
+        }
+        return this._keysCache
     }
 
     /**
      * @returns a set of all unique values in the grid
      */
     values(): T[] {
-        const allValues = this.entries().map(([_, value]) => value)
-        return Array.from(new Set<T>(allValues))
+        if (!this._valuesCache) {
+            const result = Array.from(new Set<T>(this.entries().map(([_, value]) => value)))
+            this._valuesCache = result
+        }
+        return this._valuesCache
+    }
+
+    private clearCaches() {
+        this._entriesCache = null
+        this._keysCache = null
+        this._valuesCache = null
     }
 
     /**
