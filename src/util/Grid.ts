@@ -24,7 +24,13 @@ export class Grid<T> {
 
     remove({ x, y }: Point) {
         this._entriesCache = null
-        this._map.get(x)?.delete(y)
+        const xMap = this._map.get(x)
+        if (xMap) {
+            xMap.delete(y)
+            if (xMap.size === 0) {
+                this._map.delete(x)
+            }
+        }
     }
 
     removeAll(element: T) {
@@ -85,7 +91,8 @@ export class Grid<T> {
      * @returns a set of all unique values in the grid
      */
     values(): T[] {
-        return this.entries().map(([_, value]) => value)
+        const allValues = this.entries().map(([_, value]) => value)
+        return Array.from(new Set<T>(allValues))
     }
 
     /**

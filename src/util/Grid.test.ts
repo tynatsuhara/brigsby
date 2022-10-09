@@ -73,4 +73,11 @@ describe("grid", () => {
         expect(deserialized.get(pt(1, 2))).toEqual(2)
         expect(deserialized.get(pt(-2, 2))).toEqual(3)
     })
+
+    test("values response should be unique", async () => {
+        const grid = new Grid<number>()
+        grid.set(pt(1, 2), 2)
+        grid.set(pt(2, 2), 2)
+        expect(grid.values().length).toEqual(1)
+    })
 })
