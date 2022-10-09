@@ -3,42 +3,48 @@ import { BinaryHeap } from "./BinaryHeap"
 
 // an infinite grid using x/y coordinates (x increases to the right, y increases down)
 export class Grid<T> {
-    private _map: { [key: string]: T } = {}
-    private _valuesCache: T[] // calling Object.values() repeatedly is expensive
+    // maps x -> y -> value
+    private _map: Map<number, Map<number, T>> = new Map()
+    private _entriesCache: [Point, T][]
 
-    set(pt: Point, entry: T) {
-        this._valuesCache = null
-        this._map[pt.toString()] = entry
+    set({ x, y }: Point, entry: T) {
+        this._entriesCache = null
+        if (!this._map.has(x)) {
+            this._map.set(x, new Map())
+        }
+        this._map.get(x).set(y, entry)
     }
 
     /**
      * @returns the element at the point or null if not present in the grid
      */
-    get(pt: Point): T {
-        return this._map[pt.toString()]
+    get({ x, y }: Point): T {
+        return this._map.get(x)?.get(y)
     }
 
-    remove(pt: Point) {
-        this._valuesCache = null
-        delete this._map[pt.toString()]
+    remove({ x, y }: Point) {
+        this._entriesCache = null
+        this._map.get(x)?.delete(y)
     }
 
     removeAll(element: T) {
-        this._valuesCache = null
-        Object.entries(this._map)
-            .filter((kv) => kv[1] === element)
-            .forEach((kv) => delete this._map[kv[0]])
+        this._entriesCache = null
+        this.entries().forEach(([point, value]) => {
+            if (value === element) {
+                this.remove(point)
+            }
+        })
     }
 
     clear() {
-        this._map = {}
-        this._valuesCache = null
+        this._entriesCache = null
+        this._map = new Map()
     }
 
     map<V>(fn: (value: T) => V): Grid<V> {
         const result = new Grid<V>()
-        this.entries().forEach(([pt, val]) => {
-            result.set(pt, fn(val))
+        this.entries().forEach(([point, val]) => {
+            result.set(point, fn(val))
         })
         return result
     }
@@ -53,28 +59,33 @@ export class Grid<T> {
         return result
     }
 
-    /**
-     * This requires parsing all keys and can be expensive if done frequently
-     */
     entries(): [Point, T][] {
-        return Object.entries(this._map).map((tuple) => [Point.fromString(tuple[0]), tuple[1]])
+        if (this._entriesCache) {
+            return this._entriesCache
+        }
+
+        const result: [Point, T][] = []
+
+        for (const [x, xMap] of this._map.entries()) {
+            for (const [y, val] of xMap.entries()) {
+                result.push([new Point(x, y), val])
+            }
+        }
+
+        this._entriesCache = result
+
+        return result
     }
 
-    /**
-     * This requires parsing all keys and can be expensive if done frequently
-     */
     keys(): Point[] {
-        return Object.keys(this._map).map((ptStr) => Point.fromString(ptStr))
+        return this.entries().map(([point, _]) => point)
     }
 
     /**
      * @returns a set of all unique values in the grid
      */
     values(): T[] {
-        if (!this._valuesCache) {
-            this._valuesCache = Array.from(new Set(Object.values(this._map)))
-        }
-        return this._valuesCache
+        return this.entries().map(([_, value]) => value)
     }
 
     /**
@@ -202,7 +213,11 @@ export class Grid<T> {
     }
 
     serialize(): { [key: string]: T } {
-        return this._map
+        const result = {}
+        this.entries().forEach(([point, value]) => {
+            result[point.toString()] = value
+        })
+        return result
     }
 
     /**
@@ -254,7 +269,9 @@ export class Grid<T> {
 
     static deserialize<T>(map: { [key: string]: T }): Grid<T> {
         const g = new Grid<T>()
-        g._map = map
+        Object.entries(map).forEach(([ptString, value]) => {
+            g.set(Point.fromString(ptString), value)
+        })
         return g
     }
 }
