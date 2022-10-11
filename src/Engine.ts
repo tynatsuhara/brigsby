@@ -27,11 +27,16 @@ export class UpdateData {
     readonly elapsedTimeMillis: number
     readonly input: CapturedInput
     readonly dimensions: Point
+    /**
+     * Each update cycle, this increments by 1. The initial value is 1.
+     */
+    readonly tick: number
 }
 
 export class Engine {
     private readonly game: Game
     private readonly input: Input
+    private tickCounter = 1
 
     private lastUpdateMillis = new Date().getTime()
 
@@ -92,6 +97,7 @@ export class Engine {
                     elapsedTimeMillis,
                     input: input.scaledForView(v),
                     dimensions,
+                    tick: this.tickCounter,
                 }
 
                 // Behavior where an entity belongs to multiple views is undefined (revisit later, eg for splitscreen)
@@ -122,6 +128,7 @@ export class Engine {
                     elapsedTimeMillis: updateViewsContext.elapsedTimeMillis,
                     input: input.scaledForView(v),
                     dimensions: renderer.getDimensions().div(v.zoom),
+                    tick: this.tickCounter,
                 }
                 v.entities.forEach((e) =>
                     e.components.forEach((c) => {
@@ -142,6 +149,7 @@ export class Engine {
         }
 
         this.lastUpdateMillis = time
+        this.tickCounter++
 
         requestAnimationFrame(() => this.tick())
     }
