@@ -13,6 +13,9 @@ export class Profiler {
 
     private tracked = new Map<string, [MovingAverage, (number) => string]>()
 
+    private shownInfo: string[] = []
+    private displayed: string[] = []
+
     updateEngineTickStats(
         msSinceLastUpdate: number,
         msForUpdate: number,
@@ -25,6 +28,20 @@ export class Profiler {
         this.renderTracker.record(msForRender)
         this.lateUpdateTracker.record(msForLateUpdate)
         this.componentsUpdated = componentsUpdated
+
+        this.displayed = [
+            `FPS: ${round(1000 / this.fpsTracker.get())} (${round(
+                this.fpsTracker.get()
+            )} ms per frame)`,
+            `update() duration ms: ${round(this.updateTracker.get(), 2)}`,
+            `render() duration ms: ${round(this.renderTracker.get(), 2)}`,
+            `lateUpdate() duration ms: ${round(this.lateUpdateTracker.get(), 2)}`,
+            `components updated: ${this.componentsUpdated}`,
+            ...Array.from(this.tracked.values()).map((v) => v[1](v[0].get())),
+            ...this.shownInfo,
+        ]
+
+        this.shownInfo = []
     }
 
     customTrackMovingAverage(key: string, value: number, displayFn: (number) => string) {
@@ -36,24 +53,23 @@ export class Profiler {
         tracker[0].record(value)
     }
 
+    /**
+     * @param str to display on the profiler output — this will be cleared after every update cycle
+     */
+    showInfo(str: string) {
+        this.shownInfo.push(str)
+    }
+
     getView(): View {
-        const s = [
-            `FPS: ${round(1000 / this.fpsTracker.get())} (${round(
-                this.fpsTracker.get()
-            )} ms per frame)`,
-            `update() duration ms: ${round(this.updateTracker.get(), 2)}`,
-            `render() duration ms: ${round(this.renderTracker.get(), 2)}`,
-            `lateUpdate() duration ms: ${round(this.lateUpdateTracker.get(), 2)}`,
-            `components updated: ${this.componentsUpdated}`,
-            ...Array.from(this.tracked.values()).map((v) => v[1](v[0].get())),
-        ]
+        const debugPosition = new Point(60, 70)
+        const lineHeight = 25
         return {
             entities: [
                 new Entity(
-                    s.map(
+                    this.displayed.map(
                         (str, i) =>
                             new BasicRenderComponent(
-                                new TextRender(str, new Point(60, 70 + 25 * i))
+                                new TextRender(str, debugPosition.plusY(lineHeight * i))
                             )
                     )
                 ),
