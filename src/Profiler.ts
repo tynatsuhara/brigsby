@@ -1,5 +1,6 @@
 import { Entity } from "./Entity"
-import { Point } from "./Point"
+import { Point, pt } from "./Point"
+import { RectRender, renderer } from "./renderer"
 import { BasicRenderComponent } from "./renderer/BasicRenderComponent"
 import { TextRender } from "./renderer/TextRender"
 import { View } from "./View"
@@ -61,18 +62,35 @@ export class Profiler {
     }
 
     getView(): View {
-        const debugPosition = new Point(60, 70)
-        const lineHeight = 25
+        const lineHeight = 24
+        const padding = 8
+        const boxSize = pt(
+            renderer.getDimensions().x,
+            lineHeight * this.displayed.length + 2 * padding
+        )
         return {
             entities: [
-                new Entity(
-                    this.displayed.map(
+                new Entity([
+                    new BasicRenderComponent(
+                        new RectRender({
+                            depth: -1,
+                            color: "#0000007F",
+                            dimensions: boxSize,
+                        })
+                    ),
+                    ...this.displayed.map(
                         (str, i) =>
                             new BasicRenderComponent(
-                                new TextRender(str, debugPosition.plusY(lineHeight * i))
+                                new TextRender(
+                                    str,
+                                    pt(padding, padding + lineHeight * i),
+                                    18,
+                                    "Arial",
+                                    "white"
+                                )
                             )
-                    )
-                ),
+                    ),
+                ]),
             ],
             zoom: 1,
             offset: Point.ZERO,
