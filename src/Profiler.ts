@@ -62,11 +62,11 @@ export class Profiler {
     }
 
     getView(): View {
-        const lineHeight = 24
-        const padding = 8
+        const lineHeight = 20
+        const verticalPadding = 8
         const boxSize = pt(
             renderer.getDimensions().x,
-            lineHeight * this.displayed.length + 2 * padding
+            lineHeight * this.displayed.length + 2 * verticalPadding
         )
         return {
             entities: [
@@ -83,8 +83,8 @@ export class Profiler {
                             new BasicRenderComponent(
                                 new TextRender(
                                     str,
-                                    pt(padding, padding + lineHeight * i),
-                                    18,
+                                    pt(10, verticalPadding + lineHeight * i),
+                                    16,
                                     "Arial",
                                     "white"
                                 )
