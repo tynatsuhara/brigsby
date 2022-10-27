@@ -1,7 +1,8 @@
-import { SpriteSource } from "./SpriteSource"
-import { Point } from "../Point"
-import { SpriteTransform } from "./SpriteTransform"
+import { Point, pt } from "../Point"
+import { Grid } from "../util"
 import { SpriteComponent } from "./SpriteComponent"
+import { SpriteSource } from "./SpriteSource"
+import { SpriteTransform } from "./SpriteTransform"
 
 export const NineSlice = {
     nineSliceForEach: (dimensions: Point, fn: (pt: Point, nineSliceIndex: number) => void) => {
@@ -43,86 +44,100 @@ export const NineSlice = {
     },
 
     /**
-     * @param slice the 9 parts to use to make a rectangle
-     * @param pos top-left top-left position
+     * @param slice the 9 parts to use to make a rectangle — suppliers, for easy facilitation of variants
      * @param dimensions dimensions of the desired rectangle in tile units
-     * @return All the tiles instantiated. The first element in the list is the main transform, the rest are relative.
+     * @param position top-left top-left position
+     * @param depth depth of the sprites
+     * @return The single transform and all the sprite components
      */
     makeNineSliceComponents: (
-        slice: SpriteSource[],
-        pos: Point,
-        dimensions: Point
-    ): SpriteComponent[] => {
+        slice: (() => SpriteSource)[],
+        dimensions: Point,
+        { position, depth }: { position?: Point; depth?: number } = {}
+    ): { transform: SpriteTransform; sprites: Grid<SpriteComponent> } => {
         if (slice.length !== 9) {
             throw new Error("nine slice gotta have nine slices ya dip")
         }
         if (dimensions.x < 2 || dimensions.y < 2) {
             throw new Error("9 slice must be at least 2x2")
         }
-        const tiles: SpriteComponent[] = []
-        tiles.push(slice[0].toComponent(new SpriteTransform(new Point(0, 0))))
-        tiles.push(slice[2].toComponent(new SpriteTransform(new Point(dimensions.x - 1, 0))))
-        tiles.push(slice[6].toComponent(new SpriteTransform(new Point(0, dimensions.y - 1))))
-        tiles.push(
-            slice[8].toComponent(new SpriteTransform(new Point(dimensions.x - 1, dimensions.y - 1)))
-        )
+        const sprites = new Grid<SpriteComponent>()
+        const addSprite = (i: number, pt: Point) => {
+            const transform =
+                i === 0
+                    ? SpriteTransform.new({ position: position.apply(Math.floor), depth })
+                    : SpriteTransform.new({ position: pt })
+            sprites.set(pt, slice[i]().toComponent(transform))
+        }
+        addSprite(0, pt(0, 0))
+        addSprite(2, pt(dimensions.x - 1, 0))
+        addSprite(6, pt(0, dimensions.y - 1))
+        addSprite(8, pt(dimensions.x - 1, dimensions.y - 1))
         // horizontal lines
         for (let i = 1; i < dimensions.x - 1; i++) {
-            tiles.push(slice[1].toComponent(new SpriteTransform(new Point(i, 0))))
-            tiles.push(slice[7].toComponent(new SpriteTransform(new Point(i, dimensions.y - 1))))
+            addSprite(1, pt(i, 0))
+            addSprite(7, pt(i, dimensions.y - 1))
         }
         // vertical lines
         for (let j = 1; j < dimensions.y - 1; j++) {
-            tiles.push(slice[3].toComponent(new SpriteTransform(new Point(0, j))))
-            tiles.push(slice[5].toComponent(new SpriteTransform(new Point(dimensions.x - 1, j))))
+            addSprite(3, pt(0, j))
+            addSprite(5, pt(dimensions.x - 1, j))
         }
         // middle
         for (let x = 1; x < dimensions.x - 1; x++) {
             for (let y = 1; y < dimensions.y - 1; y++) {
-                tiles.push(slice[4].toComponent(new SpriteTransform(new Point(x, y))))
+                addSprite(4, pt(x, y))
             }
         }
 
-        const mainTransform = tiles[0].transform
-        tiles.forEach((c, i) => {
-            c.transform.position = c.transform.position.times(tiles[0].transform.dimensions.x)
+        const transform = sprites.get(Point.ZERO).transform
+        sprites.values().forEach((c, i) => {
+            c.transform.position = c.transform.position.times(transform.dimensions.x)
             if (i > 0) {
-                c.transform.relativeTo(mainTransform)
+                c.transform.relativeTo(transform)
             }
         })
-        mainTransform.position = mainTransform.position.plus(pos).apply(Math.floor)
+        transform.position = (position ?? Point.ZERO).apply(Math.floor)
+        transform.depth = depth ?? transform.depth
 
-        return tiles
+        return { transform, sprites }
     },
 
     /**
      * Same as makeNineSliceComponents, but will stretch the middle parts instead of tiling.
      * This lets you make nine-slices whose dimensions aren't a multiple of the tile size.
      * @param slice the 9 parts to use to make a rectangle
-     * @param pos top-left top-left position
      * @param dimensions dimensions of the desired rectangle in pixels. Should be at least TILE_SIZExTILE_SIZE
-     * @return All the tiles instantiated. The first element in the list is the main transform, the rest are relative.
+     * @param position top-left top-left position
+     * @param depth depth of the sprites
+     * @return The single transform and all the sprite components
      */
     makeStretchedNineSliceComponents: (
         slice: SpriteSource[],
-        pos: Point,
-        dimensions: Point
-    ): SpriteComponent[] => {
+        dimensions: Point,
+        { position = Point.ZERO, depth = 0 }: { position?: Point; depth?: number } = {}
+    ): { transform: SpriteTransform; sprites: SpriteComponent[] } => {
         if (slice.length !== 9) {
             throw new Error("nine slice gotta have nine slices ya dip")
         }
         // if (dimensions.x < 2 || dimensions.y < 2) {
         // throw new Error("9 slice must be at least 2x2")
         // }
-        const tiles: SpriteComponent[] = []
-        const topLeft = slice[0].toComponent(new SpriteTransform(new Point(0, 0)))
+        const sprites: SpriteComponent[] = []
+        const topLeft = slice[0].toComponent(
+            SpriteTransform.new({ position: position.apply(Math.floor), depth })
+        )
         const tileSize = topLeft.transform.dimensions.x
 
         // corners
-        tiles.push(topLeft)
-        tiles.push(slice[2].toComponent(new SpriteTransform(new Point(dimensions.x - tileSize, 0))))
-        tiles.push(slice[6].toComponent(new SpriteTransform(new Point(0, dimensions.y - tileSize))))
-        tiles.push(
+        sprites.push(topLeft)
+        sprites.push(
+            slice[2].toComponent(new SpriteTransform(new Point(dimensions.x - tileSize, 0)))
+        )
+        sprites.push(
+            slice[6].toComponent(new SpriteTransform(new Point(0, dimensions.y - tileSize)))
+        )
+        sprites.push(
             slice[8].toComponent(
                 new SpriteTransform(new Point(dimensions.x - tileSize, dimensions.y - tileSize))
             )
@@ -130,10 +145,10 @@ export const NineSlice = {
 
         // horizontal lines
         const horizontalDimensions = new Point(dimensions.x - tileSize * 2, tileSize)
-        tiles.push(
+        sprites.push(
             slice[1].toComponent(new SpriteTransform(new Point(tileSize, 0), horizontalDimensions))
         )
-        tiles.push(
+        sprites.push(
             slice[7].toComponent(
                 new SpriteTransform(
                     new Point(tileSize, dimensions.y - tileSize),
@@ -144,10 +159,10 @@ export const NineSlice = {
 
         // vertical lines
         const verticalDimensions = new Point(tileSize, dimensions.y - tileSize * 2)
-        tiles.push(
+        sprites.push(
             slice[3].toComponent(new SpriteTransform(new Point(0, tileSize), verticalDimensions))
         )
-        tiles.push(
+        sprites.push(
             slice[5].toComponent(
                 new SpriteTransform(
                     new Point(dimensions.x - tileSize, tileSize),
@@ -157,7 +172,7 @@ export const NineSlice = {
         )
 
         // middle
-        tiles.push(
+        sprites.push(
             slice[4].toComponent(
                 new SpriteTransform(
                     new Point(tileSize, tileSize),
@@ -166,14 +181,12 @@ export const NineSlice = {
             )
         )
 
-        const mainTransform = tiles[0].transform
-        tiles.forEach((c, i) => {
+        sprites.forEach((c, i) => {
             if (i > 0) {
-                c.transform.relativeTo(mainTransform)
+                c.transform.relativeTo(topLeft.transform)
             }
         })
-        mainTransform.position = mainTransform.position.plus(pos).apply(Math.floor)
 
-        return tiles
+        return { transform: topLeft.transform, sprites }
     },
 }
