@@ -92,8 +92,8 @@ export const NineSlice = {
 
         const transform = sprites.get(Point.ZERO).transform
         sprites.values().forEach((c, i) => {
-            c.transform.position = c.transform.position.times(transform.dimensions.x)
             if (i > 0) {
+                c.transform.position = c.transform.position.times(transform.dimensions.x)
                 c.transform.relativeTo(transform)
             }
         })
