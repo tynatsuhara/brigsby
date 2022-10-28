@@ -53,7 +53,7 @@ export const NineSlice = {
     makeNineSliceComponents: (
         slice: (() => SpriteSource)[],
         dimensions: Point,
-        { position, depth }: { position?: Point; depth?: number } = {}
+        { position = Point.ZERO, depth = 0 }: { position?: Point; depth?: number } = {}
     ): { transform: SpriteTransform; sprites: Grid<SpriteComponent> } => {
         if (slice.length !== 9) {
             throw new Error("nine slice gotta have nine slices ya dip")
@@ -97,8 +97,6 @@ export const NineSlice = {
                 c.transform.relativeTo(transform)
             }
         })
-        transform.position = (position ?? Point.ZERO).apply(Math.floor)
-        transform.depth = depth ?? transform.depth
 
         return { transform, sprites }
     },
