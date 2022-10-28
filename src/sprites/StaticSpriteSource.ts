@@ -77,6 +77,10 @@ export class StaticSpriteSource implements SpriteSource {
      * gives a "pixel perfect" rotation rather than displaying pixels at an angle.
      */
     rotated(degree: number): StaticSpriteSource {
+        if (degree === 0) {
+            return this
+        }
+
         // First, draw the necessary subsection of the sprite sheet to get an ImageData
         const context = document.createElement("canvas").getContext("2d")
         context.drawImage(
