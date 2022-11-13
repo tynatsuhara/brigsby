@@ -1,3 +1,5 @@
+export type PointValue = { x: number; y: number }
+
 export class Point {
     static readonly ZERO = new Point(0, 0)
 
@@ -22,8 +24,8 @@ export class Point {
         return new Point(Math.floor(this.x / denominator), Math.floor(this.y / denominator))
     }
 
-    plus(other: Point): Point {
-        return new Point(this.x + other.x, this.y + other.y)
+    plus({ x, y }: PointValue): Point {
+        return new Point(this.x + x, this.y + y)
     }
 
     plusX(dx: number): Point {
@@ -34,23 +36,23 @@ export class Point {
         return new Point(this.x, this.y + dy)
     }
 
-    minus(other: Point): Point {
-        return new Point(this.x - other.x, this.y - other.y)
+    minus({ x, y }: PointValue): Point {
+        return new Point(this.x - x, this.y - y)
     }
 
-    lerp(multiplier: number, goal: Point): Point {
+    lerp(multiplier: number, { x, y }: PointValue): Point {
         const clampedMultiplier = Math.max(Math.min(multiplier, 1), 0)
-        return this.plus(goal.minus(this).times(clampedMultiplier))
+        return this.plus(new Point(x, y).minus(this).times(clampedMultiplier))
     }
 
-    distanceTo(pt: Point): number {
-        const dx = pt.x - this.x
-        const dy = pt.y - this.y
+    distanceTo({ x, y }: PointValue): number {
+        const dx = x - this.x
+        const dy = y - this.y
         return Math.sqrt(dx * dx + dy * dy)
     }
 
-    manhattanDistanceTo(pt: Point): number {
-        return Math.abs(pt.x - this.x) + Math.abs(pt.y - this.y)
+    manhattanDistanceTo({ x, y }: PointValue): number {
+        return Math.abs(x - this.x) + Math.abs(y - this.y)
     }
 
     magnitude(): number {
@@ -90,8 +92,8 @@ export class Point {
         return new Point(halves[0], halves[1])
     }
 
-    equals(pt: Point) {
-        return pt && pt.x == this.x && pt.y == this.y
+    equals({ x, y }: PointValue) {
+        return pt && x == this.x && y == this.y
     }
 
     apply(fn: (n: number) => number) {
@@ -122,7 +124,7 @@ export class Point {
     /**
      * Returns the point you get by rotating this point clockwise around the given center
      */
-    rotatedAround(center: Point, degrees: number): Point {
+    rotatedAround(center: PointValue, degrees: number): Point {
         const { x, y } = this,
             { x: cx, y: cy } = center,
             radians = (Math.PI / 180) * -degrees,
