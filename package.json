@@ -11,7 +11,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/tylerbonnell/brigsby.git"
+        "url": "git+https://github.com/tynatsuhara/brigsby.git"
     },
     "keywords": [
         "brigsby",
@@ -19,12 +19,12 @@
         "engine",
         "typescript"
     ],
-    "author": "Tyler Bonnell",
+    "author": "Tyler Natsuhara",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/tylerbonnell/brigsby/issues"
+        "url": "https://github.com/tynatsuhara/brigsby/issues"
     },
-    "homepage": "https://github.com/tylerbonnell/brigsby#readme",
+    "homepage": "https://brigsby.js.org",
     "devDependencies": {
         "jest": "^29.1.2",
         "prettier": "^2.7.1",
