@@ -1,3 +1,5 @@
+![npm](https://img.shields.io/npm/v/brigsby?color=cornflowerblue&logo=npm&logoColor=white)
+
 # Brigsby
 
 Brigsby is a TypeScript game engine that runs in the browser, originally developed for [SWAMP CAMP](https://swamp.camp).
@@ -12,4 +14,4 @@ npm i brigsby
 
 ## Demos
 
-Demo source code is available in [/demos](https://github.com/tylerbonnell/brigsby/tree/main/demos).
+Demo source code is available in [/demos](https://github.com/tynatsuhara/brigsby/tree/main/demos).
