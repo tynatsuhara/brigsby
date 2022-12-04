@@ -1,4 +1,6 @@
-![npm](https://img.shields.io/npm/v/brigsby?color=cornflowerblue&logo=npm&logoColor=white)
+<picture>
+  <img alt="npm version" src="https://img.shields.io/npm/v/brigsby?color=cornflowerblue&logo=npm&logoColor=white">
+</picture>
 
 # Brigsby
 
