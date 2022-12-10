@@ -38,9 +38,11 @@ class PongGame extends Game {
             zoom: 1,
             offset: Point.ZERO,
         }
-    }
 
-    getViews = () => [this.view]
+        this.scene = {
+            getViews: () => [this.view],
+        }
+    }
 }
 
 Engine.start(new PongGame(), <HTMLCanvasElement>document.getElementById("pong-canvas"))
