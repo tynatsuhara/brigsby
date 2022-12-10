@@ -18,4 +18,5 @@ export {
 } from "./Input"
 export { Point, pt } from "./Point"
 export { profiler } from "./Profiler"
+export { Scene } from "./Scene"
 export type { AbstractType, ConcreteType } from "./Types"

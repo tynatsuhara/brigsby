@@ -79,13 +79,27 @@ export class Engine {
             elapsedTimeMillis,
         }
 
+        const scene = this.game.scene
         const views = this.getViews(updateViewsContext)
         collisionEngine._setViewContext(views)
+
+        /**
+         * foreach which short circuits if the game scene changes
+         */
+        const forEachSafely = <T>(list: T[], fn: (t: T) => void) => {
+            for (const t of list) {
+                if (this.game.scene !== scene) {
+                    return
+                }
+
+                fn(t)
+            }
+        }
 
         let componentsUpdated = 0
 
         const [updateDuration] = measure(() => {
-            views.forEach((v) => {
+            forEachSafely(views, (v) => {
                 v.entities = v.entities.filter((e) => !!e)
 
                 const dimensions = renderer.getDimensions().div(v.zoom)
@@ -101,8 +115,8 @@ export class Engine {
                 }
 
                 // Behavior where an entity belongs to multiple views is undefined (revisit later, eg for splitscreen)
-                v.entities.forEach((e) =>
-                    e.components.forEach((c) => {
+                forEachSafely(v.entities, (e) =>
+                    forEachSafely(e.components, (c) => {
                         if (!c.enabled) {
                             return
                         }
@@ -122,7 +136,7 @@ export class Engine {
         })
 
         const [lateUpdateDuration] = measure(() => {
-            views.forEach((v) => {
+            forEachSafely(views, (v) => {
                 const updateData: UpdateData = {
                     view: v,
                     elapsedTimeMillis: updateViewsContext.elapsedTimeMillis,
@@ -130,8 +144,8 @@ export class Engine {
                     dimensions: renderer.getDimensions().div(v.zoom),
                     tick: this.tickCounter,
                 }
-                v.entities.forEach((e) =>
-                    e.components.forEach((c) => {
+                forEachSafely(v.entities, (e) =>
+                    forEachSafely(e.components, (c) => {
                         c.lateUpdate(updateData)
                     })
                 )
@@ -155,6 +169,8 @@ export class Engine {
     }
 
     private getViews(context: UpdateViewsContext): View[] {
-        return this.game.getViews(context).concat(debug.showProfiler ? [profiler.getView()] : [])
+        return this.game.scene
+            .getViews(context)
+            .concat(debug.showProfiler ? [profiler.getView()] : [])
     }
 }
