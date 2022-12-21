@@ -41,7 +41,14 @@ export class StaticSpriteSource implements SpriteSource {
         return new SpriteComponent(this, transform)
     }
 
+    /**
+     * @param filter if nullish, returns itself
+     */
     filtered(filter: ImageFilter): StaticSpriteSource {
+        if (!filter) {
+            return this
+        }
+
         const canvas = document.createElement("canvas")
         canvas.width = this.dimensions.x
         canvas.height = this.dimensions.y
