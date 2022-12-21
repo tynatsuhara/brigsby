@@ -8,6 +8,7 @@ import { SpriteTransform } from "./SpriteTransform"
 export class AnimatedSpriteComponent extends SpriteComponent {
     private animator: Animator
     private animations: SpriteAnimation[]
+    private animationIndex: number
 
     constructor(animations: SpriteAnimation[], transform: SpriteTransform = new SpriteTransform()) {
         if (animations.length < 1) {
@@ -27,12 +28,11 @@ export class AnimatedSpriteComponent extends SpriteComponent {
      * @param animationIndex the index in the array passed to the constructor
      */
     goToAnimation(animationIndex: number) {
+        this.animationIndex = animationIndex
         const anim = this.animations[animationIndex]
         this.animator = new Animator(
             anim.frames.map((f) => f[1]),
-            (index) => {
-                this.sprite = anim.getSprite(index)
-            },
+            (index) => this.updateSprite(index),
             anim.onFinish
         )
         return this
@@ -56,8 +56,12 @@ export class AnimatedSpriteComponent extends SpriteComponent {
         this.animator.update(Math.floor(ms))
     }
 
-    // This won't currently refresh the animation
     applyFilter(filter: ImageFilter) {
         this.animations = this.animations.map((a) => a?.filtered(filter))
+        this.updateSprite()
+    }
+
+    private updateSprite(frame = this.currentFrame()) {
+        this.sprite = this.animations[this.animationIndex].getSprite(frame)
     }
 }
