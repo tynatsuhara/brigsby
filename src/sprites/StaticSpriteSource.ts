@@ -1,5 +1,6 @@
 import { Point } from "../Point"
 import { ImageRender } from "../renderer/ImageRender"
+import { rotSpriteCanvas } from "./rotSpriteCanvas"
 import { rotSpriteWebGL } from "./rotSpriteWebGL"
 import { SpriteComponent } from "./SpriteComponent"
 import { ImageFilter, SpriteSource } from "./SpriteSource"
@@ -82,8 +83,12 @@ export class StaticSpriteSource implements SpriteSource {
      * https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms#RotSprite
      * This is more expensive than applying rotation with the SpriteTransform, but
      * gives a "pixel perfect" rotation rather than displaying pixels at an angle.
+     *
+     * @param method
+     *     webgl: very fast, but runs aynsc and has a limited number of contexts available
+     *     canvas (default): slower, runs synchronously
      */
-    rotated(degree: number): StaticSpriteSource {
+    rotated(degree: number, method: "webgl" | "canvas" = "canvas"): StaticSpriteSource {
         if (degree === 0) {
             return this
         }
@@ -103,7 +108,8 @@ export class StaticSpriteSource implements SpriteSource {
         )
         const image = context.getImageData(0, 0, this.dimensions.x, this.dimensions.y)
 
-        const result = rotSpriteWebGL(image, degree)
+        const rotateFn = method === "webgl" ? rotSpriteWebGL : rotSpriteCanvas
+        const result = rotateFn(image, degree)
 
         return new StaticSpriteSource(result, Point.ZERO, new Point(result.width, result.height))
     }
