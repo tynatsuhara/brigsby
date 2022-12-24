@@ -1,6 +1,6 @@
 {
     "name": "brigsby",
-    "version": "0.7.2",
+    "version": "0.7.3",
     "description": "A browser-based TypeScript game engine.",
     "scripts": {
         "clean": "rm -rf dist",
