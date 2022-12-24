@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 import { debug } from "../Debug"
+import { Point } from "../Point"
 
 let vshader = `
 	attribute vec4 position;
@@ -116,7 +117,30 @@ let fshader = `
   }
 `
 
-export const rotSpriteWebGL = (image: ImageData, degree: number): HTMLCanvasElement => {
+export const rotSpriteWebGL = (
+    imageSource: CanvasImageSource,
+    sourcePosition: Point,
+    sourceDimensions: Point,
+    degree: number
+): HTMLCanvasElement | OffscreenCanvas => {
+    const sourceCanvas = document.createElement("canvas")
+    sourceCanvas.width = sourceDimensions.x
+    sourceCanvas.height = sourceDimensions.y
+    const sourceContext = sourceCanvas.getContext("2d")
+    sourceContext.drawImage(
+        imageSource,
+        sourcePosition.x,
+        sourcePosition.y,
+        sourceDimensions.x,
+        sourceDimensions.y,
+        0,
+        0,
+        sourceDimensions.x,
+        sourceDimensions.y
+    )
+
+    const image = sourceContext.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height)
+
     const canvas = document.createElement("canvas")
     const SCALE = 8
     const gl = canvas.getContext("webgl", { antialias: false })
@@ -127,8 +151,6 @@ export const rotSpriteWebGL = (image: ImageData, degree: number): HTMLCanvasElem
     if (!program) {
         throw new Error("No program")
     }
-
-    const startTime = new Date().getTime()
 
     if (debug.spriteRotateDebug) {
         console.log("MAX_TEXTURE_SIZE is: ", gl.getParameter(gl.MAX_TEXTURE_SIZE))
@@ -314,10 +336,6 @@ export const rotSpriteWebGL = (image: ImageData, degree: number): HTMLCanvasElem
     gl.canvas.height = Math.round(rotH / SCALE)
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, N)
-
-    if (debug.spriteRotateDebug) {
-        console.log(`sprite rotation took ${new Date().getTime() - startTime} milliseconds`)
-    }
 
     // export image data
     return gl.canvas

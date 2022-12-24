@@ -24,14 +24,66 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-export const rotSpriteCanvas = (image: ImageData, DEGREE: number) => {
+import { debug } from "../Debug"
+import { Point } from "../Point"
+
+export const rotSpriteCanvas = (
+    imageSource: CanvasImageSource,
+    sourcePosition: Point,
+    sourceDimensions: Point,
+    degree: number
+) => {
     const SCALE = 8
-    const naturalWidth = image.width
-    const naturalHeight = image.height
+    const { x: naturalWidth, y: naturalHeight } = sourceDimensions
     if (naturalWidth > 512 || naturalHeight > 512) {
         throw new Error("Size exceeded")
     }
 
+    const sourceCanvas = document.createElement("canvas")
+    const sourceContext = sourceCanvas.getContext("2d")
+    const drawToSourceCanvas = (xOffset: number, yOffset: number) => {
+        sourceContext.drawImage(
+            imageSource,
+            sourcePosition.x,
+            sourcePosition.y,
+            sourceDimensions.x,
+            sourceDimensions.y,
+            xOffset,
+            yOffset,
+            sourceDimensions.x,
+            sourceDimensions.y
+        )
+    }
+
+    sourceCanvas.width = naturalWidth
+    sourceCanvas.height = naturalHeight
+
+    // for 90/180/270 we can rotate in a cheaper way
+    if (degree % 90 === 0) {
+        if (debug.spriteRotateDebug) {
+            console.log("quick rotation")
+        }
+        if (degree % 180 !== 0) {
+            sourceCanvas.width = naturalHeight
+            sourceCanvas.height = naturalWidth
+        }
+        const radians = (degree * Math.PI) / 180
+        sourceContext.rotate(radians)
+        // offsets:
+        //   90: 0, -y
+        //   180: -x, -y
+        //   270: -x, 0
+        drawToSourceCanvas(
+            degree > 90 ? -sourceDimensions.x : 0,
+            degree < 270 ? -sourceDimensions.y : 0
+        )
+        return sourceCanvas
+    } else {
+        // draw to the source canvas so we can call getImageData
+        drawToSourceCanvas(0, 0)
+    }
+
+    const image = sourceContext.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height)
     const reduced = reduceImage(image.data)
 
     const upscaledImage = upscaleImageEPX(reduced, image.width, image.height, SCALE)
@@ -40,7 +92,7 @@ export const rotSpriteCanvas = (image: ImageData, DEGREE: number) => {
         upscaledImage,
         naturalWidth * SCALE,
         naturalHeight * SCALE,
-        DEGREE
+        degree
     )
 
     let {

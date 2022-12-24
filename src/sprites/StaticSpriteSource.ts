@@ -1,3 +1,4 @@
+import { debug } from "../Debug"
 import { Point } from "../Point"
 import { ImageRender } from "../renderer/ImageRender"
 import { rotSpriteCanvas } from "./rotSpriteCanvas"
@@ -85,31 +86,27 @@ export class StaticSpriteSource implements SpriteSource {
      * gives a "pixel perfect" rotation rather than displaying pixels at an angle.
      *
      * @param method
-     *     webgl: very fast, but runs aynsc and has a limited number of contexts available
-     *     canvas (default): slower, runs synchronously
+     *     webgl: very fast, but there are a limited number of contexts available,
+     *            so this is not a good choice if you're calling this in rapid succession
+     *     canvas (default): slower, but not limited like webgl is
      */
     rotated(degree: number, method: "webgl" | "canvas" = "canvas"): StaticSpriteSource {
+        // normalize degree [0, 360)
+        degree = degree % 360
+        if (degree < 0) {
+            degree += 360
+        }
+
         if (degree === 0) {
             return this
         }
 
-        // First, draw the necessary subsection of the sprite sheet to get an ImageData
-        const context = document.createElement("canvas").getContext("2d")
-        context.drawImage(
-            this.image,
-            this.position.x,
-            this.position.y,
-            this.dimensions.x,
-            this.dimensions.y,
-            0,
-            0,
-            this.dimensions.x,
-            this.dimensions.y
-        )
-        const image = context.getImageData(0, 0, this.dimensions.x, this.dimensions.y)
-
+        const startTime = new Date().getTime()
         const rotateFn = method === "webgl" ? rotSpriteWebGL : rotSpriteCanvas
-        const result = rotateFn(image, degree)
+        const result = rotateFn(this.image, this.position, this.dimensions, degree)
+        if (debug.spriteRotateDebug) {
+            console.log(`sprite rotation took ${new Date().getTime() - startTime} milliseconds`)
+        }
 
         return new StaticSpriteSource(result, Point.ZERO, new Point(result.width, result.height))
     }
