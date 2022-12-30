@@ -2,35 +2,11 @@ import { AwakeData, StartData, UpdateData } from "./Engine"
 import { Entity } from "./Entity"
 import { RenderMethod } from "./renderer/RenderMethod"
 
-export class Component {
+export abstract class Component {
     entity: Entity
     enabled: boolean = true
     get isStarted() {
         return this.start === ALREADY_STARTED_COMPONENT
-    }
-
-    /**
-     * To simplify the programming model and reduce the need for class implementations of simple
-     * one-off components, you can pass function overrides to the constructor. For example:
-     *
-     *     new Component({ update: (data) => {
-     *         // do something every update cycle
-     *     }})
-     */
-    constructor({
-        awake,
-        start,
-        update,
-        lateUpdate,
-        getRenderMethods,
-        delete: deleteFn,
-    }: Partial<Component> = {}) {
-        this.awake = awake ?? this.awake
-        this.start = start ?? this.start
-        this.update = update ?? this.update
-        this.lateUpdate = lateUpdate ?? this.lateUpdate
-        this.getRenderMethods = getRenderMethods ?? this.getRenderMethods
-        this.delete = deleteFn ?? this.delete
     }
 
     /**
