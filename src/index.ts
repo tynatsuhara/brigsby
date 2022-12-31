@@ -1,4 +1,5 @@
 // Singletons
+export { AnonymousComponent } from "./AnonymousComponent"
 export { assets } from "./Assets"
 export { Component } from "./Component"
 export { debug } from "./Debug"
