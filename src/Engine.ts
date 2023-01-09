@@ -117,7 +117,7 @@ export class Engine {
                 // Behavior where an entity belongs to multiple views is undefined (revisit later, eg for splitscreen)
                 forEachSafely(v.entities, (e) =>
                     forEachSafely(e.components, (c) => {
-                        if (!c.enabled) {
+                        if (!c.enabled || !c.entity) {
                             return
                         }
                         if (!c.isStarted) {
@@ -146,6 +146,9 @@ export class Engine {
                 }
                 forEachSafely(v.entities, (e) =>
                     forEachSafely(e.components, (c) => {
+                        if (!c.enabled || !c.entity) {
+                            return
+                        }
                         c.lateUpdate(updateData)
                     })
                 )
