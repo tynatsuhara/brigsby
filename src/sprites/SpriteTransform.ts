@@ -1,5 +1,14 @@
 import { Point } from "../Point"
 
+export type SpriteTransformOptions = {
+    position?: Point
+    dimensions?: Point
+    rotation?: number
+    mirrorX?: boolean
+    mirrorY?: boolean
+    depth?: number
+}
+
 /**
  * A representation of a sprite's transform in a world space,
  * either absolute or relative to another SpriteTransform.
@@ -18,14 +27,7 @@ export class SpriteTransform {
         mirrorX = false,
         mirrorY = false,
         depth = 0,
-    }: {
-        position?: Point
-        dimensions?: Point
-        rotation?: number
-        mirrorX?: boolean
-        mirrorY?: boolean
-        depth?: number
-    }) {
+    }: SpriteTransformOptions) {
         return new SpriteTransform(position, dimensions, rotation, mirrorX, mirrorY, depth)
     }
 
