@@ -1,5 +1,5 @@
-import { View } from "../View"
 import { Point } from "../Point"
+import { View } from "../View"
 
 export class RenderContext {
     private readonly canvas: HTMLCanvasElement
@@ -86,6 +86,7 @@ export class RenderContext {
      * @param pixelPerfect
      * @param mirrorX
      * @param mirrorY
+     * @param alpha 0-1
      */
     drawImage(
         source: CanvasImageSource,
@@ -96,7 +97,8 @@ export class RenderContext {
         rotation: number,
         pixelPerfect: boolean,
         mirrorX: boolean,
-        mirrorY: boolean
+        mirrorY: boolean,
+        alpha: number
     ): void {
         destDimensions = destDimensions ?? sourceDimensions
         // const mirroredOffset = new Point(mirrorX ? destDimensions.x : 0, mirrorY ? destDimensions.y : 0)
@@ -120,6 +122,8 @@ export class RenderContext {
         }
 
         this.context.save()
+
+        this.context.globalAlpha = alpha
 
         // Use Math.floor() to prevent tearing between images
         this.context.translate(Math.floor(scaledDestPosition.x), Math.floor(scaledDestPosition.y))

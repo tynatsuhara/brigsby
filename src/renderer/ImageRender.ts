@@ -11,6 +11,7 @@ export class ImageRender extends RenderMethod {
     rotation: number // clockwise rotation in degrees
     mirrorX: boolean
     mirrorY: boolean
+    alpha: number
 
     constructor(
         source: CanvasImageSource,
@@ -21,7 +22,8 @@ export class ImageRender extends RenderMethod {
         depth: number = 0,
         rotation: number = 0,
         mirrorX: boolean = false,
-        mirrorY: boolean = false
+        mirrorY: boolean = false,
+        alpha: number = 1
     ) {
         super(depth)
         this.source = source
@@ -32,6 +34,7 @@ export class ImageRender extends RenderMethod {
         this.rotation = rotation
         this.mirrorX = mirrorX
         this.mirrorY = mirrorY
+        this.alpha = alpha
     }
 
     render(context: RenderContext) {
@@ -46,7 +49,8 @@ export class ImageRender extends RenderMethod {
             this.rotation,
             pixelPerfect,
             this.mirrorX,
-            this.mirrorY
+            this.mirrorY,
+            this.alpha
         )
     }
 }
