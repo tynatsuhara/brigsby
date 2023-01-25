@@ -125,7 +125,7 @@ export enum MouseButton {
 
 // TODO: Add globally-configured deadzones
 
-export class Input {
+export class CanvasInput {
     private readonly keys: Set<string> = new Set()
     private lastCapture: CapturedInput = new CapturedInput()
     private mousePos: Point = new Point(0, 0)

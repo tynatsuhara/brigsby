@@ -2,7 +2,7 @@ import { collisionEngine } from "./collision/CollisionEngine"
 import { ALREADY_STARTED_COMPONENT } from "./Component"
 import { debug } from "./Debug"
 import { Game } from "./Game"
-import { CapturedInput, Input } from "./Input"
+import { CanvasInput, CapturedInput } from "./Input"
 import { Point } from "./Point"
 import { measure, profiler } from "./Profiler"
 import { renderer } from "./renderer/Renderer"
@@ -35,7 +35,7 @@ export class UpdateData {
 
 export class Engine {
     private readonly game: Game
-    private readonly input: Input
+    private readonly input: CanvasInput
     private tickCounter = 1
 
     private lastUpdateMillis = new Date().getTime()
@@ -52,7 +52,7 @@ export class Engine {
 
     private constructor(game: Game, canvas: HTMLCanvasElement) {
         this.game = game
-        this.input = new Input(canvas)
+        this.input = new CanvasInput(canvas)
         renderer._setCanvas(canvas)
 
         this.game.initialize()

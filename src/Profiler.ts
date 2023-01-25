@@ -5,7 +5,7 @@ import { BasicRenderComponent } from "./renderer/BasicRenderComponent"
 import { TextRender } from "./renderer/TextRender"
 import { View } from "./View"
 
-export class Profiler {
+class Profiler {
     private fpsTracker = new MovingAverage()
     private updateTracker = new MovingAverage()
     private renderTracker = new MovingAverage()
@@ -98,7 +98,7 @@ export class Profiler {
     }
 }
 
-const round = (val, pow = 0) => {
+const round = (val: number, pow = 0) => {
     const decimals = Math.pow(10, pow)
     return Math.round(val * decimals) / decimals
 }

@@ -1,23 +1,13 @@
 // Singletons
-export { AnonymousComponent } from "./AnonymousComponent"
-export { assets } from "./Assets"
-export { Component } from "./Component"
-export { debug } from "./Debug"
-export { AwakeData, Engine, StartData, UpdateData, UpdateViewsContext } from "./Engine"
-export { Entity } from "./Entity"
-export { Game } from "./Game"
-export {
-    ButtonState,
-    CapturedGamepad,
-    CapturedInput,
-    GamepadButton,
-    GamepadVibrationOptions,
-    Input,
-    InputKey,
-    InputKeyString,
-    MouseButton,
-} from "./Input"
-export { Point, pt } from "./Point"
-export { profiler } from "./Profiler"
-export { Scene } from "./Scene"
-export type { AbstractType, ConcreteType } from "./Types"
+export * from "./AnonymousComponent"
+export * from "./Assets"
+export * from "./Component"
+export * from "./Debug"
+export * from "./Engine"
+export * from "./Entity"
+export * from "./Game"
+export * from "./Input"
+export * from "./Point"
+export * from "./Profiler"
+export * from "./Scene"
+export * from "./Types"
