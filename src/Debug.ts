@@ -8,9 +8,13 @@ const _debug = Object.assign(
 )
 
 function loadDebug(): any {
+    if (typeof localStorage === "undefined") {
+        console.log("[debug] cannot access localStorage, debug disabled")
+        return {}
+    }
     const stored = localStorage.getItem("debug_state")
     if (stored) {
-        console.log("loaded debug state from local storage")
+        console.log("[debug] loaded state from localStorage")
         return JSON.parse(stored)
     }
     return {}
@@ -19,17 +23,14 @@ function loadDebug(): any {
 export const debug = new Proxy(_debug, {
     set(target, property, value, receiver) {
         let success = Reflect.set(target, property, value, receiver)
-        if (success) {
+        if (success && typeof localStorage !== "undefined") {
             localStorage.setItem("debug_state", JSON.stringify(_debug))
         }
         return success
     },
 })
 
-window["debug"] = debug
-
-// from https://stackoverflow.com/questions/4391575/how-to-find-the-size-of-localstorage
-window["localStorageUsage"] = () => {
+const localStorageUsage = () => {
     var _lsTotal = 0,
         _xLen,
         _x
@@ -43,3 +44,17 @@ window["localStorageUsage"] = () => {
     }
     console.log("Total = " + (_lsTotal / 1024).toFixed(2) + " KB")
 }
+
+/**
+ * Safely expose stuff on the window
+ * @param stuff key/value pairs to expose
+ */
+export const expose = (stuff: object) => {
+    if (typeof window !== "undefined") {
+        Object.entries(stuff).forEach(([key, val]) => {
+            window[key] = val
+        })
+    }
+}
+
+expose({ debug, localStorageUsage })
