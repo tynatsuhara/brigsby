@@ -1,4 +1,5 @@
 import { Point } from "./Point"
+import { renderer } from "./renderer"
 import { View } from "./View"
 
 export enum ButtonState {
@@ -169,7 +170,7 @@ export class CanvasInput {
         window.onkeyup = (e) => this.keys.delete(this.captureKey(e).code)
     }
 
-    captureInput(): CapturedInput {
+    _captureInput(): CapturedInput {
         const keys = Array.from(this.keys)
         const currentInput = new CapturedInput(
             new Set(keys.filter((key) => !this.lastCapture.isKeyHeld(key as InputKey))),
@@ -333,12 +334,12 @@ export class CapturedInput {
         this.gamepads = gamepads
     }
 
-    scaledForView(view: View): CapturedInput {
+    _scaledForView(view: View): CapturedInput {
         return new CapturedInput(
             this.keysDown,
             this.keysHeld,
             this.keysUp,
-            this.mousePos.div(view.zoom).minus(view.offset),
+            this.mousePos.div(view.zoom).div(renderer.getScale()).minus(view.offset),
             this.mousePosDelta,
             this.isMouseDown,
             this.isMouseHeld,

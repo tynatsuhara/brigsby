@@ -2,17 +2,32 @@ import { Point } from "../Point"
 import { View } from "../View"
 import { RenderContext } from "./RenderContext"
 
+export type CanvasOptions = {
+    scale?: number
+}
+
 class Renderer {
     private canvas: HTMLCanvasElement
+    private scale: number
     private context: CanvasRenderingContext2D
 
     getDimensions(): Point {
-        return new Point(this.canvas.width, this.canvas.height)
+        return new Point(this.canvas.width, this.canvas.height).div(this.scale)
     }
 
-    _setCanvas(canvas: HTMLCanvasElement) {
+    getScale() {
+        return this.scale
+    }
+
+    _setCanvas(canvas: HTMLCanvasElement, { scale = 1 }: CanvasOptions) {
+        // the transform origin should match our coordinate system where top left is (0, 0)
+        canvas.style.transformOrigin = "top left"
+        canvas.style.transform = `scale(${scale})`
+        this.scale = scale
+
         this.canvas = canvas
         this.context = canvas.getContext("2d", { alpha: true })
+
         this.resizeCanvas()
     }
 

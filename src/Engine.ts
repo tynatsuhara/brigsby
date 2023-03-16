@@ -5,7 +5,7 @@ import { Game } from "./Game"
 import { CanvasInput, CapturedInput } from "./Input"
 import { Point } from "./Point"
 import { measure, profiler } from "./Profiler"
-import { renderer } from "./renderer/Renderer"
+import { CanvasOptions, renderer } from "./renderer/Renderer"
 import { Maths } from "./util/Maths"
 import { View } from "./View"
 
@@ -40,20 +40,20 @@ export class Engine {
 
     private lastUpdateMillis = new Date().getTime()
 
-    static start(game: Game, canvas: HTMLCanvasElement) {
+    static start(game: Game, canvas: HTMLCanvasElement, canvasOptions: CanvasOptions = {}) {
         if (!game) {
             throw new Error("game cannot be null")
         }
         if (!canvas) {
             throw new Error("canvas cannot be null")
         }
-        new Engine(game, canvas)
+        new Engine(game, canvas, canvasOptions)
     }
 
-    private constructor(game: Game, canvas: HTMLCanvasElement) {
+    private constructor(game: Game, canvas: HTMLCanvasElement, canvasOptions: CanvasOptions) {
         this.game = game
         this.input = new CanvasInput(canvas)
-        renderer._setCanvas(canvas)
+        renderer._setCanvas(canvas, canvasOptions)
 
         this.game.initialize()
 
@@ -73,7 +73,7 @@ export class Engine {
             MIN_ELAPSED_MILLIS,
             MAX_ELAPSED_MILLIS
         )
-        const input = this.input.captureInput()
+        const input = this.input._captureInput()
 
         const updateViewsContext: UpdateViewsContext = {
             elapsedTimeMillis,
@@ -109,7 +109,7 @@ export class Engine {
                 const updateData: UpdateData = {
                     view: v,
                     elapsedTimeMillis,
-                    input: input.scaledForView(v),
+                    input: input._scaledForView(v),
                     dimensions,
                     tick: this.tickCounter,
                 }
@@ -140,7 +140,7 @@ export class Engine {
                 const updateData: UpdateData = {
                     view: v,
                     elapsedTimeMillis: updateViewsContext.elapsedTimeMillis,
-                    input: input.scaledForView(v),
+                    input: input._scaledForView(v),
                     dimensions: renderer.getDimensions().div(v.zoom),
                     tick: this.tickCounter,
                 }
