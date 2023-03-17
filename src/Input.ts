@@ -141,7 +141,12 @@ export class CanvasInput {
     constructor(canvas: HTMLCanvasElement) {
         canvas.oncontextmenu = () => false
 
-        canvas.onmousedown = (e) => {
+        const setMousePos = (e: PointerEvent) => {
+            this.mousePos = new Point(e.x - canvas.offsetLeft, e.y - canvas.offsetTop)
+        }
+
+        canvas.onpointerdown = (e) => {
+            setMousePos(e)
             if (e.button === MouseButton.LEFT) {
                 this.isMouseDown = true
                 this.isMouseHeld = true
@@ -152,7 +157,8 @@ export class CanvasInput {
                 this.isRightMouseUp = false
             }
         }
-        canvas.onmouseup = (e) => {
+        canvas.onpointerup = (e) => {
+            setMousePos(e)
             if (e.button === MouseButton.LEFT) {
                 this.isMouseDown = false
                 this.isMouseHeld = false
@@ -163,8 +169,7 @@ export class CanvasInput {
                 this.isRightMouseUp = true
             }
         }
-        canvas.onmousemove = (e) =>
-            (this.mousePos = new Point(e.x - canvas.offsetLeft, e.y - canvas.offsetTop))
+        canvas.onpointermove = setMousePos
         canvas.onwheel = (e) => (this.mouseWheelDeltaY = e.deltaY)
         window.onkeydown = (e) => this.keys.add(this.captureKey(e).code)
         window.onkeyup = (e) => this.keys.delete(this.captureKey(e).code)
