@@ -4,29 +4,31 @@ import { RenderContext } from "./RenderContext"
 
 export type CanvasOptions = {
     scale?: number
+    fixedHeight?: number
 }
 
 class Renderer {
     private canvas: HTMLCanvasElement
-    private scale: number
+    private options: CanvasOptions
+    private scale: number = 1
     private context: CanvasRenderingContext2D
 
     getDimensions(): Point {
-        return new Point(this.canvas.width, this.canvas.height).div(this.scale)
+        return new Point(this.canvas.width, this.canvas.height)
     }
 
     getScale() {
         return this.scale
     }
 
-    _setCanvas(canvas: HTMLCanvasElement, { scale = 1 }: CanvasOptions) {
+    _setCanvas(canvas: HTMLCanvasElement, options: CanvasOptions) {
         // the transform origin should match our coordinate system where top left is (0, 0)
         canvas.style.transformOrigin = "top left"
-        canvas.style.transform = `scale(${scale})`
-        this.scale = scale
 
         this.canvas = canvas
         this.context = canvas.getContext("2d", { alpha: true })
+
+        this.options = options
 
         this.resizeCanvas()
     }
@@ -40,9 +42,21 @@ class Renderer {
     }
 
     private resizeCanvas() {
+        const { clientWidth, clientHeight } = this.canvas.parentElement
+        const { scale, fixedHeight } = this.options
+
+        if (scale) {
+            this.scale = scale
+        } else if (fixedHeight) {
+            this.scale = clientHeight / fixedHeight
+        }
+
         // make sure stuff doesn't get stretched
-        this.canvas.width = this.canvas.clientWidth
-        this.canvas.height = this.canvas.clientHeight
+        this.canvas.style.transform = `scale(${this.scale})`
+        this.canvas.style.width = `${clientWidth / this.scale}px`
+        this.canvas.style.height = `${clientHeight / this.scale}px`
+        this.canvas.width = clientWidth / this.scale
+        this.canvas.height = clientHeight / this.scale
     }
 
     private renderView(view: View) {
