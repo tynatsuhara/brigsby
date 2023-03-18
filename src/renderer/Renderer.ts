@@ -22,6 +22,9 @@ class Renderer {
     }
 
     _setCanvas(canvas: HTMLCanvasElement, options: CanvasOptions) {
+        // focusing adds an ugly outline, so automatically blur
+        canvas.onfocus = () => canvas.blur()
+
         // the transform origin should match our coordinate system where top left is (0, 0)
         canvas.style.transformOrigin = "top left"
 
