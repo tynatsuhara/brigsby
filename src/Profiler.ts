@@ -6,6 +6,8 @@ import { TextRender } from "./renderer/TextRender"
 import { View } from "./View"
 
 class Profiler {
+    public scale = 1
+
     private fpsTracker = new MovingAverage()
     private updateTracker = new MovingAverage()
     private renderTracker = new MovingAverage()
@@ -62,12 +64,14 @@ class Profiler {
     }
 
     getView(): View {
+        const scale = (Math.round((1 / renderer.getScale()) * 10) / 10) * this.scale
         const lineHeight = 20
         const verticalPadding = 8
         const boxSize = pt(
-            renderer.getDimensions().x,
+            renderer.getDimensions().x / scale,
             lineHeight * this.displayed.length + 2 * verticalPadding
         )
+
         return {
             entities: [
                 new Entity([
@@ -92,7 +96,7 @@ class Profiler {
                     ),
                 ]),
             ],
-            zoom: 1,
+            zoom: scale,
             offset: Point.ZERO,
         }
     }
