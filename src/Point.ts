@@ -92,8 +92,8 @@ export class Point {
         return new Point(halves[0], halves[1])
     }
 
-    equals({ x, y }: PointValue) {
-        return pt && x == this.x && y == this.y
+    equals(other: PointValue) {
+        return other && other.x == this.x && other.y == this.y
     }
 
     apply(fn: (n: number) => number) {
