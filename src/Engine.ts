@@ -54,6 +54,7 @@ export class Engine {
         this.game = game
         this.input = new CanvasInput(canvas)
         renderer._setCanvas(canvas, canvasOptions)
+        profiler._mount(canvas.parentElement)
 
         this.game.initialize()
 
@@ -80,7 +81,7 @@ export class Engine {
         }
 
         const scene = this.game.scene
-        const views = this.getViews(updateViewsContext)
+        const views = this.game.scene.getViews(updateViewsContext)
         collisionEngine._setViewContext(views)
 
         /**
@@ -156,24 +157,21 @@ export class Engine {
         })
 
         if (debug.showProfiler) {
-            profiler.updateEngineTickStats(
+            profiler._updateEngineTickStats(
                 elapsedTimeMillis,
                 updateDuration,
                 renderDuration,
                 lateUpdateDuration,
                 componentsUpdated
             )
+            profiler._flush()
+        } else {
+            profiler._hide()
         }
 
         this.lastUpdateMillis = time
         this.tickCounter++
 
         requestAnimationFrame(() => this.tick())
-    }
-
-    private getViews(context: UpdateViewsContext): View[] {
-        return this.game.scene
-            .getViews(context)
-            .concat(debug.showProfiler ? [profiler.getView()] : [])
     }
 }

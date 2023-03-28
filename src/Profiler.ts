@@ -1,13 +1,4 @@
-import { Entity } from "./Entity"
-import { Point, pt } from "./Point"
-import { RectRender, renderer } from "./renderer"
-import { BasicRenderComponent } from "./renderer/BasicRenderComponent"
-import { TextRender } from "./renderer/TextRender"
-import { View } from "./View"
-
 class Profiler {
-    public scale = 1
-
     private fpsTracker = new MovingAverage()
     private updateTracker = new MovingAverage()
     private renderTracker = new MovingAverage()
@@ -19,7 +10,32 @@ class Profiler {
     private shownInfo: string[] = []
     private displayed: string[] = []
 
-    updateEngineTickStats(
+    private element: HTMLDivElement
+
+    _mount(parentElement: HTMLElement) {
+        this.element = document.createElement("div")
+        this.element.className = "brigsby-profiler"
+        this.element.style.zIndex = "1_000_000"
+        this.element.style.position = "absolute"
+        this.element.style.background = "#0000007F"
+        this.element.style.width = "100%"
+        this.element.style.userSelect = "none"
+        this.element.style.pointerEvents = "none"
+        this.element.style.font = "message-box"
+        this.element.style.padding = "6px"
+        parentElement.appendChild(this.element)
+    }
+
+    _flush() {
+        this.element.style.display = "block"
+        this.element.innerHTML = this.displayed.join("<br/>")
+    }
+
+    _hide() {
+        this.element.style.display = "none"
+    }
+
+    _updateEngineTickStats(
         msSinceLastUpdate: number,
         msForUpdate: number,
         msForRender: number,
@@ -61,44 +77,6 @@ class Profiler {
      */
     showInfo(str: string) {
         this.shownInfo.push(str)
-    }
-
-    getView(): View {
-        const scale = (Math.round((1 / renderer.getScale()) * 10) / 10) * this.scale
-        const lineHeight = 20
-        const verticalPadding = 8
-        const boxSize = pt(
-            renderer.getDimensions().x / scale,
-            lineHeight * this.displayed.length + 2 * verticalPadding
-        )
-
-        return {
-            entities: [
-                new Entity([
-                    new BasicRenderComponent(
-                        new RectRender({
-                            depth: -1,
-                            color: "#0000007F",
-                            dimensions: boxSize,
-                        })
-                    ),
-                    ...this.displayed.map(
-                        (str, i) =>
-                            new BasicRenderComponent(
-                                new TextRender(
-                                    str,
-                                    pt(10, verticalPadding + lineHeight * i),
-                                    16,
-                                    "Arial",
-                                    "white"
-                                )
-                            )
-                    ),
-                ]),
-            ],
-            zoom: scale,
-            offset: Point.ZERO,
-        }
     }
 }
 
