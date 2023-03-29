@@ -27,6 +27,8 @@ class Renderer {
 
         // the transform origin should match our coordinate system where top left is (0, 0)
         canvas.style.transformOrigin = "top left"
+        // prevent touchscreen manipulation
+        canvas.style.touchAction = "none"
 
         this.canvas = canvas
         this.context = canvas.getContext("2d", { alpha: true })

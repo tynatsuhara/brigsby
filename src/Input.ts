@@ -124,6 +124,8 @@ export enum MouseButton {
     RIGHT = 2,
 }
 
+type PointerType = "mouse" | "touch"
+
 // TODO: Add globally-configured deadzones
 
 export class CanvasInput {
@@ -137,16 +139,18 @@ export class CanvasInput {
     private isRightMouseHeld: boolean = false
     private isRightMouseUp: boolean = false
     private mouseWheelDeltaY: number = 0
+    private pointerType: PointerType
 
     constructor(canvas: HTMLCanvasElement) {
         canvas.oncontextmenu = () => false
 
-        const setMousePos = (e: PointerEvent) => {
+        const updatePointerInfo = (e: PointerEvent) => {
             this.mousePos = new Point(e.x - canvas.offsetLeft, e.y - canvas.offsetTop)
+            this.pointerType = e.pointerType === "mouse" || !e.pointerType ? "mouse" : "touch"
         }
 
         canvas.onpointerdown = (e) => {
-            setMousePos(e)
+            updatePointerInfo(e)
             if (e.button === MouseButton.LEFT) {
                 this.isMouseDown = true
                 this.isMouseHeld = true
@@ -158,7 +162,7 @@ export class CanvasInput {
             }
         }
         canvas.onpointerup = (e) => {
-            setMousePos(e)
+            updatePointerInfo(e)
             if (e.button === MouseButton.LEFT) {
                 this.isMouseDown = false
                 this.isMouseHeld = false
@@ -169,7 +173,7 @@ export class CanvasInput {
                 this.isRightMouseUp = true
             }
         }
-        canvas.onpointermove = setMousePos
+        canvas.onpointermove = updatePointerInfo
         canvas.onwheel = (e) => (this.mouseWheelDeltaY = e.deltaY)
         window.onkeydown = (e) => this.keys.add(this.captureKey(e).code)
         window.onkeyup = (e) => this.keys.delete(this.captureKey(e).code)
@@ -190,6 +194,7 @@ export class CanvasInput {
             this.isRightMouseHeld,
             this.isRightMouseUp,
             this.mouseWheelDeltaY,
+            this.pointerType,
             this.captureGamepads()
         )
 
@@ -295,49 +300,22 @@ export class CapturedGamepad {
 }
 
 export class CapturedInput {
-    private readonly keysDown: Set<string>
-    private readonly keysHeld: Set<string>
-    private readonly keysUp: Set<string>
-    readonly mousePos: Point = new Point(0, 0)
-    readonly mousePosDelta: Point
-    readonly isMouseDown: boolean
-    readonly isMouseHeld: boolean
-    readonly isMouseUp: boolean
-    readonly isRightMouseDown: boolean
-    readonly isRightMouseHeld: boolean
-    readonly isRightMouseUp: boolean
-    readonly mouseWheelDeltaY: number
-    readonly gamepads: CapturedGamepad[]
-
     constructor(
-        keysDown: Set<string> = new Set(),
-        keysHeld: Set<string> = new Set(),
-        keysUp: Set<string> = new Set(),
-        mousePos: Point = new Point(0, 0),
-        mousePosDelta: Point = new Point(0, 0),
-        isMouseDown: boolean = false,
-        isMouseHeld: boolean = false,
-        isMouseUp: boolean = false,
-        isRightMouseDown: boolean = false,
-        isRightMouseHeld: boolean = false,
-        isRightMouseUp: boolean = false,
-        mouseWheelDeltaY: number = 0,
-        gamepads: CapturedGamepad[] = []
-    ) {
-        this.keysDown = keysDown
-        this.keysHeld = keysHeld
-        this.keysUp = keysUp
-        this.mousePos = mousePos
-        this.mousePosDelta = mousePosDelta
-        this.isMouseDown = isMouseDown
-        this.isMouseHeld = isMouseHeld
-        this.isMouseUp = isMouseUp
-        this.isRightMouseDown = isRightMouseDown
-        this.isRightMouseHeld = isRightMouseHeld
-        this.isRightMouseUp = isRightMouseUp
-        this.mouseWheelDeltaY = mouseWheelDeltaY
-        this.gamepads = gamepads
-    }
+        private readonly keysDown: Set<string> = new Set(),
+        private readonly keysHeld: Set<string> = new Set(),
+        private readonly keysUp: Set<string> = new Set(),
+        readonly mousePos: Point = new Point(0, 0),
+        readonly mousePosDelta: Point = new Point(0, 0),
+        readonly isMouseDown: boolean = false,
+        readonly isMouseHeld: boolean = false,
+        readonly isMouseUp: boolean = false,
+        readonly isRightMouseDown: boolean = false,
+        readonly isRightMouseHeld: boolean = false,
+        readonly isRightMouseUp: boolean = false,
+        readonly mouseWheelDeltaY: number = 0,
+        readonly pointerType: PointerType = "mouse",
+        readonly gamepads: CapturedGamepad[] = []
+    ) {}
 
     _scaledForView(view: View): CapturedInput {
         return new CapturedInput(
@@ -353,6 +331,7 @@ export class CapturedInput {
             this.isRightMouseHeld,
             this.isRightMouseUp,
             this.mouseWheelDeltaY,
+            this.pointerType,
             this.gamepads
         )
     }
