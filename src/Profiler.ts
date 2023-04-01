@@ -15,7 +15,8 @@ class Profiler {
     _mount(parentElement: HTMLElement) {
         this.element = document.createElement("div")
         this.element.className = "brigsby-profiler"
-        this.element.style.zIndex = "1_000_000"
+        this.element.style.color = "white"
+        this.element.style.zIndex = "1000000"
         this.element.style.position = "absolute"
         this.element.style.background = "#0000007F"
         this.element.style.width = "100%"
