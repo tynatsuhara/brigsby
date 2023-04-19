@@ -67,6 +67,7 @@ export enum InputKey {
     DOWN = "ArrowDown",
     LEFT = "ArrowLeft",
     RIGHT = "ArrowRight",
+    ENTER = "Enter",
 }
 
 export const InputKeyString = {
