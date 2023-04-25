@@ -121,23 +121,17 @@ export class RenderContext {
             return
         }
 
+        this.context.save()
+
         this.context.globalAlpha = alpha
 
         // Use Math.floor() to prevent tearing between images
+        this.context.translate(Math.floor(scaledDestPosition.x), Math.floor(scaledDestPosition.y))
+
         const rotationTranslate = destDimensions.div(2).times(this.view.zoom)
-        const totalTranslation = scaledDestPosition.apply(Math.floor).plus(rotationTranslate)
-        const totalRotation = (rotation * Math.PI) / 180
-        this.context.setTransform(
-            mirrorX ? -1 : 1,
-            0,
-            0,
-            mirrorY ? -1 : 1,
-            totalTranslation.x,
-            totalTranslation.y
-        )
-        if (totalRotation != 0) {
-            this.context.rotate(totalRotation)
-        }
+        this.context.translate(rotationTranslate.x, rotationTranslate.y)
+        this.context.rotate((rotation * Math.PI) / 180)
+        this.context.scale(mirrorX ? -1 : 1, mirrorY ? -1 : 1)
 
         this.context.drawImage(
             source,
@@ -151,11 +145,7 @@ export class RenderContext {
             scaledDestDimensions.y
         )
 
-        this.context.globalAlpha = 1
-        if (totalRotation != 0) {
-            this.context.rotate(-totalRotation)
-        }
-        this.context.resetTransform()
+        this.context.restore()
     }
 
     rotate(angle: number): void {
