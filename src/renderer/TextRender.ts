@@ -1,4 +1,5 @@
 import { Point } from "../Point"
+import { AsyncRenderer } from "./AsyncRenderer"
 import { RenderContext } from "./RenderContext"
 import { RenderMethod } from "./RenderMethod"
 
@@ -30,5 +31,19 @@ export class TextRender extends RenderMethod {
 
     render(context: RenderContext): void {
         context.fillText(this.size, this.font, this.color, this.text, this.position, this.alignment)
+    }
+
+    renderAsync(renderer: AsyncRenderer): void {
+        renderer.post({
+            t: "t",
+            d: this.depth,
+            tx: this.text,
+            px: this.position.x,
+            py: this.position.y,
+            s: this.size,
+            f: this.font,
+            c: this.color,
+            a: this.alignment,
+        })
     }
 }

@@ -1,4 +1,5 @@
 import { Point } from "../Point"
+import { AsyncRenderer } from "./AsyncRenderer"
 import { RenderContext } from "./RenderContext"
 import { RenderMethod } from "./RenderMethod"
 
@@ -23,5 +24,18 @@ export class LineRender extends RenderMethod {
         context.moveTo(this.start)
         context.lineTo(this.end)
         context.stroke()
+    }
+
+    renderAsync(renderer: AsyncRenderer): void {
+        renderer.post({
+            t: "l",
+            d: this.depth,
+            sx: this.start.x,
+            sy: this.start.y,
+            ex: this.end.x,
+            ey: this.end.y,
+            w: this.width,
+            c: this.color,
+        })
     }
 }

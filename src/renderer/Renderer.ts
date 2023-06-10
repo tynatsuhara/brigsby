@@ -1,10 +1,13 @@
 import { Point } from "../Point"
 import { View } from "../View"
-import { RenderContext } from "./RenderContext"
+import { AsyncRenderer } from "./AsyncRenderer"
+import { RendererImpl } from "./RendererImpl"
+import { SimpleRenderer } from "./SimpleRenderer"
 
 export type CanvasOptions = {
     scale?: number
     fixedHeight?: number
+    renderWorkerScriptUrl?: string
 }
 
 class Renderer {
@@ -12,6 +15,7 @@ class Renderer {
     private options: CanvasOptions
     private scale: number = 1
     private context: CanvasRenderingContext2D
+    private renderer: RendererImpl
 
     getDimensions(): Point {
         return new Point(this.canvas.width, this.canvas.height)
@@ -35,15 +39,18 @@ class Renderer {
 
         this.options = options
 
+        this.renderer = options.renderWorkerScriptUrl
+            ? new AsyncRenderer(canvas, this.context, options.renderWorkerScriptUrl)
+            : new SimpleRenderer(canvas, this.context)
+
         this.resizeCanvas()
     }
 
     _render(views: View[]) {
-        this.resizeCanvas()
+        // this.resizeCanvas()
         this.context.imageSmoothingEnabled = false
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-        views.forEach((v) => this.renderView(v))
+        this.renderer.renderViews(views)
     }
 
     private resizeCanvas() {
@@ -62,17 +69,6 @@ class Renderer {
         this.canvas.style.height = `${clientHeight / this.scale}px`
         this.canvas.width = clientWidth / this.scale
         this.canvas.height = clientHeight / this.scale
-    }
-
-    private renderView(view: View) {
-        const viewRenderContext = new RenderContext(this.canvas, this.context, view)
-        view.entities
-            .flatMap((entity) => entity?.components)
-            .filter((component) => !!component && component.enabled && component.isStarted)
-            .flatMap((component) => component.getRenderMethods())
-            .filter((render) => !!render)
-            .sort((a, b) => a.depth - b.depth) // TODO possibly improve this
-            .forEach((renderMethod) => renderMethod.render(viewRenderContext))
     }
 }
 

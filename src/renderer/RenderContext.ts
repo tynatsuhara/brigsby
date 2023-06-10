@@ -1,18 +1,24 @@
 import { Point } from "../Point"
-import { View } from "../View"
 
 export class RenderContext {
-    private readonly canvas: HTMLCanvasElement
-    private readonly context: CanvasRenderingContext2D
-    private readonly view: View
+    private readonly canvas: HTMLCanvasElement | OffscreenCanvas
+    private readonly context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
     readonly width: number
     readonly height: number
+    readonly zoom: number
+    readonly offset: Point
 
-    constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View) {
+    constructor(
+        canvas: HTMLCanvasElement | OffscreenCanvas,
+        context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+        zoom: number,
+        offset: Point
+    ) {
         this.canvas = canvas
         this.context = context
-        this.view = view
+        this.zoom = zoom
+        this.offset = offset
 
         this.width = canvas.width
         this.height = canvas.height
@@ -44,17 +50,17 @@ export class RenderContext {
         point: Point,
         alignment: CanvasTextAlign
     ) {
-        const offset = this.view.offset.times(this.view.zoom).apply(Math.floor)
-        this.context.font = `${size * this.view.zoom}px '${font}'`
+        const offset = this.offset.times(this.zoom).apply(Math.floor)
+        this.context.font = `${size * this.zoom}px '${font}'`
         this.context.fillStyle = color
-        point = point.times(this.view.zoom).apply(Math.floor).plus(offset)
+        point = point.times(this.zoom).apply(Math.floor).plus(offset)
         this.context.textAlign = alignment
-        this.context.fillText(text, point.x, point.y + size * this.view.zoom)
+        this.context.fillText(text, point.x, point.y + size * this.zoom)
     }
 
     fillEllipse(pos: Point, dimensions: Point): void {
-        pos = pos.plus(this.view.offset).times(this.view.zoom)
-        const radiuses = dimensions.times(this.view.zoom).div(2)
+        pos = pos.plus(this.offset).times(this.zoom)
+        const radiuses = dimensions.times(this.zoom).div(2)
 
         this.context.beginPath()
         this.context.ellipse(
@@ -70,8 +76,8 @@ export class RenderContext {
     }
 
     fillRect(pos: Point, dimensions: Point): void {
-        pos = pos.plus(this.view.offset).times(this.view.zoom)
-        dimensions = dimensions.times(this.view.zoom)
+        pos = pos.plus(this.offset).times(this.zoom)
+        dimensions = dimensions.times(this.zoom)
 
         this.context.fillRect(pos.x, pos.y, dimensions.x, dimensions.y)
     }
@@ -102,14 +108,14 @@ export class RenderContext {
     ): void {
         destDimensions = destDimensions ?? sourceDimensions
         // const mirroredOffset = new Point(mirrorX ? destDimensions.x : 0, mirrorY ? destDimensions.y : 0)
-        const offset = this.view.offset.times(this.view.zoom).apply(Math.floor)
+        const offset = this.offset.times(this.zoom).apply(Math.floor)
         let scaledDestPosition = destPosition
-            ./*plus(mirroredOffset).*/ times(this.view.zoom)
+            ./*plus(mirroredOffset).*/ times(this.zoom)
             .plus(offset)
         if (pixelPerfect) {
             scaledDestPosition = this.pixelize(scaledDestPosition)
         }
-        const scaledDestDimensions = destDimensions.times(this.view.zoom)
+        const scaledDestDimensions = destDimensions.times(this.zoom)
 
         const biggestDimension = Math.max(scaledDestDimensions.x, scaledDestDimensions.y) // to make sure things get rendered if rotated at the edge of the screen
         if (
@@ -128,7 +134,7 @@ export class RenderContext {
         // Use Math.floor() to prevent tearing between images
         this.context.translate(Math.floor(scaledDestPosition.x), Math.floor(scaledDestPosition.y))
 
-        const rotationTranslate = destDimensions.div(2).times(this.view.zoom)
+        const rotationTranslate = destDimensions.div(2).times(this.zoom)
         this.context.translate(rotationTranslate.x, rotationTranslate.y)
         this.context.rotate((rotation * Math.PI) / 180)
         this.context.scale(mirrorX ? -1 : 1, mirrorY ? -1 : 1)
@@ -161,12 +167,12 @@ export class RenderContext {
     }
 
     moveTo(point: Point): void {
-        point = point.plus(this.view.offset).times(this.view.zoom)
+        point = point.plus(this.offset).times(this.zoom)
         this.context.moveTo(point.x, point.y)
     }
 
     lineTo(point: Point): void {
-        point = point.plus(this.view.offset).times(this.view.zoom)
+        point = point.plus(this.offset).times(this.zoom)
         this.context.lineTo(point.x, point.y)
     }
 
@@ -175,6 +181,6 @@ export class RenderContext {
     }
 
     pixelize(point: Point): Point {
-        return new Point(point.x - (point.x % this.view.zoom), point.y - (point.y % this.view.zoom))
+        return new Point(point.x - (point.x % this.zoom), point.y - (point.y % this.zoom))
     }
 }

@@ -1,4 +1,5 @@
 import { Point } from "../Point"
+import { AsyncRenderer } from "./AsyncRenderer"
 import { RenderContext } from "./RenderContext"
 import { RenderMethod } from "./RenderMethod"
 
@@ -31,5 +32,17 @@ export class EllipseRender extends RenderMethod {
     render(context: RenderContext): void {
         context.fillStyle = this.color
         context.fillEllipse(this.position, this.dimensions)
+    }
+
+    renderAsync(renderer: AsyncRenderer): void {
+        renderer.post({
+            t: "e",
+            d: this.depth,
+            px: this.position.x,
+            py: this.position.y,
+            dx: this.dimensions.x,
+            dy: this.dimensions.y,
+            c: this.color,
+        })
     }
 }
