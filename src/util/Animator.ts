@@ -3,25 +3,21 @@ export class Animator {
     private readonly frames: number[] // a list of end-of-frame timestamps
     private readonly duration: number // total duration
 
-    // callbacks
-    private readonly onFrameChange: (index: number) => void
-    private readonly onFinish: () => void // called when the last frame finishes
-
     private time: number = 0
     private index: number = 0
 
     /**
      * @param frames A list of frame durations
-     * @param fn A callback that will be called each time a frame changes, passing the zero-based frame index
+     * @param onFrameChange A callback that will be called each time a frame changes, passing the zero-based frame index
+     * @param onFinish A callback that will be called at the end of the animation. Set paused=true in this callback to stop the animation at the end.
+     * @param pauseSupplier A supplier function which will be OR'd with the paused field. Useful for pausing all animations when the game is paused.
      */
     constructor(
         frames: number[],
-        onFrameChange: (index: number) => void = () => {},
-        onFinish: () => void = () => {}
+        private readonly onFrameChange: (index: number) => void = () => {},
+        private readonly onFinish: () => void = () => {},
+        private readonly pauseSupplier: () => boolean = () => false
     ) {
-        this.onFrameChange = onFrameChange
-        this.onFinish = onFinish
-
         this.frames = []
         let durationSoFar = 0
         frames.forEach((frameDuration: number) => {
@@ -34,7 +30,7 @@ export class Animator {
     }
 
     update(elapsedTimeMillis: number) {
-        if (this.paused) {
+        if (this.paused || this.pauseSupplier()) {
             return
         }
         this.time += elapsedTimeMillis

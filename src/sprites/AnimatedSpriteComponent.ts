@@ -7,16 +7,18 @@ import { SpriteTransform } from "./SpriteTransform"
 
 export class AnimatedSpriteComponent extends SpriteComponent {
     private animator: Animator
-    private animations: SpriteAnimation[]
     private animationIndex: number
 
-    constructor(animations: SpriteAnimation[], transform: SpriteTransform = new SpriteTransform()) {
+    constructor(
+        private animations: SpriteAnimation[],
+        transform: SpriteTransform = new SpriteTransform(),
+        private readonly pauseSupplier: () => boolean = () => false
+    ) {
         if (animations.length < 1) {
             throw new Error("needs at least one animation!")
         }
         const defaultAnimation = animations[0]
         super(defaultAnimation.getSprite(0), transform)
-        this.animations = animations
         this.goToAnimation(0)
     }
 
@@ -33,7 +35,8 @@ export class AnimatedSpriteComponent extends SpriteComponent {
         this.animator = new Animator(
             anim.frames.map((f) => f[1]),
             (index) => this.updateSprite(index),
-            anim.onFinish
+            anim.onFinish,
+            this.pauseSupplier
         )
         return this
     }
