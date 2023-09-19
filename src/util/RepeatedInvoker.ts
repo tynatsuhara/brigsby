@@ -6,7 +6,6 @@ import { UpdateData } from "../Engine"
  * The invoked function runs in the update() step.
  */
 export class RepeatedInvoker extends Component {
-    private fn: (updateData: UpdateData, execution: number) => number
     private delay: number
     private execution = 0
 
@@ -14,13 +13,20 @@ export class RepeatedInvoker extends Component {
      * @param fn The function to execute. Returns the delay (in milliseconds) until the next invocation.
      * @param initialDelay The delay before the function executes for the first time.
      */
-    constructor(fn: (updateData: UpdateData, execution: number) => number, initialDelay = 0) {
+    constructor(
+        private readonly fn: (updateData: UpdateData, execution: number) => number,
+        initialDelay = 0,
+        private readonly pauseSupplier: () => boolean = () => false
+    ) {
         super()
-        this.fn = fn
         this.delay = initialDelay
     }
 
     update(updateData: UpdateData) {
+        if (this.pauseSupplier()) {
+            return
+        }
+
         this.delay -= updateData.elapsedTimeMillis
         if (this.delay < 0) {
             this.delay = this.fn(updateData, this.execution)
@@ -30,8 +36,12 @@ export class RepeatedInvoker extends Component {
 }
 
 export class LateRepeatedInvoker extends RepeatedInvoker {
-    constructor(fn: (updateData: UpdateData, execution: number) => number, initialDelay = 0) {
-        super(fn, initialDelay)
+    constructor(
+        fn: (updateData: UpdateData, execution: number) => number,
+        initialDelay = 0,
+        pauseSupplier: () => boolean = () => false
+    ) {
+        super(fn, initialDelay, pauseSupplier)
         this.lateUpdate = this.update
         this.update = () => {}
     }
