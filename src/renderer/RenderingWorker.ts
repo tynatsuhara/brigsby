@@ -1,4 +1,5 @@
 import { PointValue, pt } from "../Point"
+import { measure } from "../Profiler"
 import { EllipseRender } from "./EllipseRender"
 import { ImageRender } from "./ImageRender"
 import { LineRender } from "./LineRender"
@@ -28,6 +29,7 @@ export type RenderRequest = {
     }>
     width: number
     height: number
+    startTime: number
 }
 
 export type RenderResult = {
@@ -36,11 +38,22 @@ export type RenderResult = {
 
 const globalImageCache: Record<number, OffscreenCanvas> = {}
 
-const canvas = new OffscreenCanvas(0, 0)
-const context = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D
+let canvas: OffscreenCanvas = undefined
+let context: OffscreenCanvasRenderingContext2D = undefined
 
-export const handleRenderingEvent = (message: MessageEvent<RenderRequest>) => {
-    const { images, views, width, height } = message.data
+const handleRenderingEvent = (message: MessageEvent<RenderRequest>) => {
+    // @ts-ignore
+    if (message.data.offscreenCanvas) {
+        console.log("registered canvas in worker")
+        // @ts-ignore
+        canvas = message.data.offscreenCanvas
+        // @ts-ignore
+        context = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D
+        return
+    }
+
+    const { images, views, width, height, startTime } = message.data
+    const startTimeOnWorker = Date.now()
 
     Object.keys(images).forEach((id) => {
         const img = images[id] as ImageData
@@ -54,90 +67,33 @@ export const handleRenderingEvent = (message: MessageEvent<RenderRequest>) => {
     canvas.height = height
     context.imageSmoothingEnabled = false
 
-    views.forEach((view) => {
-        const viewRenderContext = new RenderContext(
-            canvas,
-            context,
-            view.zoom,
-            pt(view.offset.x, view.offset.y)
-        )
+    const [renderDuration] = measure(() => {
+        views.forEach((view) => {
+            const viewRenderContext = new RenderContext(
+                canvas,
+                context,
+                view.zoom,
+                pt(view.offset.x, view.offset.y)
+            )
 
-        view.methods
-            .map(dataToRenderMethod)
-            .filter((rm) => !!rm)
-            .sort((a, b) => a.depth - b.depth)
-            .forEach((renderMethod) => renderMethod.render(viewRenderContext))
+            view.methods
+                .map(dataToRenderMethod)
+                .filter((rm) => !!rm)
+                .sort((a, b) => a.depth - b.depth)
+                .forEach((renderMethod) => renderMethod.render(viewRenderContext))
+        })
     })
 
-    const response: RenderResult = {
-        imageData: context.getImageData(0, 0, width, height),
-    }
-
-    postMessage(response)
-
-    ///////////////////////////////
-    /*
-    
-    const { imageData, width, height, scale } = message.data
-
-    const smallCanvas = new OffscreenCanvas(width / scale, height / scale)
-    const smallContext = smallCanvas.getContext("2d") as OffscreenCanvasRenderingContext2D
-
-    const getPixel = (x: number, y: number) => {
-        const index = (y * width + x) * 4
-        return [
-            imageData.data[index + 0],
-            imageData.data[index + 1],
-            imageData.data[index + 2],
-            imageData.data[index + 3],
-        ]
-    }
-
-    // pixels shaved off for each row offset from the top/bottom
-    const cornerShape = [4, 2, 1, 1]
-
-    for (let y = 0; y < smallCanvas.height; y++) {
-        for (let x = 0; x < smallCanvas.width; x++) {
-            // round the corners
-            if (y < cornerShape.length) {
-                const rowBlankCount = cornerShape[y]
-                if (x < rowBlankCount || x >= smallCanvas.width - rowBlankCount) {
-                    continue
-                }
-            } else if (y >= smallCanvas.height - cornerShape.length) {
-                const rowBlankCount = cornerShape[smallCanvas.height - y - 1]
-                if (x < rowBlankCount || x >= smallCanvas.width - rowBlankCount) {
-                    continue
-                }
-            }
-
-            const bigX = x * scale
-            const bigY = y * scale
-
-            const hexStrings = []
-            for (let i = 0; i < scale; i++) {
-                for (let j = 0; j < scale; j++) {
-                    const [r, g, b] = getPixel(i + bigX, j + bigY)
-                    const hex = getHex(r, g, b)
-
-                    // weigh other colors higher than grass color to show non-nature things on the map
-                    let hexWeight = 3
-                    if (hex === Color.GREEN_5) {
-                        hexWeight = 1
-                    } else if (hex === Color.GREEN_6) {
-                        hexWeight = 2
-                    }
-                    hexStrings.push(...Array.from({ length: hexWeight }, () => hex))
-                }
-            }
-
-            const newColor = Lists.mode(hexStrings)
-            smallContext.fillStyle = newColor
-            smallContext.fillRect(x, y, 1, 1)
-        }
-    }
-    */
+    // it seems like the bulk of the work is still actually happening on the main thread :(
+    const renderFinishTime = Date.now()
+    // console.log(
+    //     `main thread = ${startTimeOnWorker - startTime}ms, worker = ${
+    //         renderFinishTime - startTimeOnWorker
+    //     }ms`
+    // )
 }
+
+onmessage = handleRenderingEvent
 
 const dataToRenderMethod = (data: RenderMethodData): RenderMethod | undefined => {
     switch (data.t) {

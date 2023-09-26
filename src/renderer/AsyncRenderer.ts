@@ -1,34 +1,31 @@
 import { View } from "../View"
-import {
-    RenderMethodData as AsyncRenderMethodData,
-    RenderRequest,
-    RenderResult,
-} from "./RenderingWorker"
+import { RenderMethodData as AsyncRenderMethodData, RenderRequest } from "./RenderingWorker"
 
 export class AsyncRenderer {
     private sendToWorker: (request: RenderRequest) => void
 
-    constructor(
-        private readonly canvas: HTMLCanvasElement,
-        private readonly context: CanvasRenderingContext2D,
-        workerScriptUrl: string
-    ) {
+    constructor(private readonly canvas: HTMLCanvasElement, workerScriptUrl: string) {
         const [sender, receiver] = createWorker(workerScriptUrl)
         this.sendToWorker = sender
-        receiver((response: RenderResult) => {
-            this.draw(response.imageData)
-        })
+
+        const offscreenCanvas = canvas.transferControlToOffscreen()
+        sender({ offscreenCanvas }, [offscreenCanvas])
+
+        // receiver((response: RenderResult) => {
+        // this.draw(response.imageData)
+        // })
     }
 
     private imagesToSend: Record<number, ImageData> = {}
     private dataToSend: Array<AsyncRenderMethodData> = []
 
-    private draw(imageData: ImageData) {
-        // this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        this.context.putImageData(imageData, 0, 0)
-    }
+    // private draw(imageData: ImageData) {
+    //     // this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    //     this.context.putImageData(imageData, 0, 0)
+    // }
 
     renderViews(views: View[]): void {
+        const startTime = Date.now()
         this.imagesToSend = {}
         const viewsBuilder: RenderRequest["views"] = []
 
@@ -54,6 +51,7 @@ export class AsyncRenderer {
             views: viewsBuilder,
             width: this.canvas.width,
             height: this.canvas.height,
+            startTime,
         })
     }
 
@@ -92,10 +90,13 @@ const IMG_ID_ATTR = "__BRIGSBY_IMG_ID__"
 
 export const createWorker = <Request, Response>(
     scriptURL: string
-): [(data: Request) => void, (callback: (response: Response) => void) => void] => {
+): [
+    (data: Request, transfer?: Transferable[]) => void,
+    (callback: (response: Response) => void) => void
+] => {
     const worker = new Worker(scriptURL)
-    const sender = (data: Request) => {
-        worker.postMessage(data)
+    const sender = (data: Request, transfer?: Transferable[]) => {
+        worker.postMessage(data, transfer)
     }
     const receiver = (callback: (response: Response) => void) => {
         worker.onmessage = (responseMessage) => callback(responseMessage.data)

@@ -3,10 +3,11 @@ import { RenderContext } from "./RenderContext"
 import { RendererImpl } from "./RendererImpl"
 
 export class SimpleRenderer implements RendererImpl {
-    constructor(
-        private readonly canvas: HTMLCanvasElement,
-        private readonly context: CanvasRenderingContext2D
-    ) {}
+    private readonly context: CanvasRenderingContext2D
+
+    constructor(private readonly canvas: HTMLCanvasElement) {
+        this.context = canvas.getContext("2d", { alpha: true })
+    }
 
     renderViews(views: View[]): void {
         views.forEach((view) => {

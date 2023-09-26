@@ -14,7 +14,7 @@ class Renderer {
     private canvas: HTMLCanvasElement
     private options: CanvasOptions
     private scale: number = 1
-    private context: CanvasRenderingContext2D
+    // private context: CanvasRenderingContext2D
     private renderer: RendererImpl
 
     getDimensions(): Point {
@@ -35,20 +35,22 @@ class Renderer {
         canvas.style.touchAction = "none"
 
         this.canvas = canvas
-        this.context = canvas.getContext("2d", { alpha: true })
+        // this.context = canvas.getContext("2d", { alpha: true })
 
         this.options = options
 
-        this.renderer = options.renderWorkerScriptUrl
-            ? new AsyncRenderer(canvas, this.context, options.renderWorkerScriptUrl)
-            : new SimpleRenderer(canvas, this.context)
-
         this.resizeCanvas()
+
+        this.renderer = options.renderWorkerScriptUrl
+            ? new AsyncRenderer(canvas, options.renderWorkerScriptUrl)
+            : new SimpleRenderer(canvas)
+
+        // this.resizeCanvas()
     }
 
     _render(views: View[]) {
         // this.resizeCanvas()
-        this.context.imageSmoothingEnabled = false
+        // this.context.imageSmoothingEnabled = false
 
         this.renderer.renderViews(views)
     }
