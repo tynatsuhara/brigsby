@@ -1,4 +1,4 @@
-import { Point } from "../Point"
+import { Point, PointValue } from "../Point"
 import { BinaryHeap } from "./BinaryHeap"
 
 // an infinite grid using x/y coordinates (x increases to the right, y increases down)
@@ -10,7 +10,7 @@ export class Grid<T> {
     private _keysCache: Point[]
     private _valuesCache: T[]
 
-    set({ x, y }: Point, entry: T) {
+    set({ x, y }: PointValue, entry: T) {
         this.clearCaches()
         if (!this._map.has(x)) {
             this._map.set(x, new Map())
@@ -21,11 +21,11 @@ export class Grid<T> {
     /**
      * @returns the element at the point or null if not present in the grid
      */
-    get({ x, y }: Point): T {
+    get({ x, y }: PointValue): T {
         return this._map.get(x)?.get(y)
     }
 
-    remove({ x, y }: Point) {
+    remove({ x, y }: PointValue) {
         this.clearCaches()
         const xMap = this._map.get(x)
         if (xMap) {
@@ -112,8 +112,8 @@ export class Grid<T> {
      * @returns a path inclusive of start and end
      */
     findPath(
-        start: Point,
-        end: Point,
+        start: PointValue,
+        end: PointValue,
         {
             heuristic = (pt) => pt.manhattanDistanceTo(end),
             distance = (a, b) => a.manhattanDistanceTo(b),
@@ -135,13 +135,16 @@ export class Grid<T> {
     ): Point[] {
         // TODO: Support bidirectional pathfinding
 
-        if (isOccupied(start) || isOccupied(end) || start.equals(end)) {
+        const startPt = new Point(start.x, start.y)
+        const endPt = new Point(end.x, end.y)
+
+        if (isOccupied(startPt) || isOccupied(endPt) || startPt.equals(endPt)) {
             return null
         }
 
         return this.findPathInternal(
-            start,
-            end,
+            startPt,
+            endPt,
             heuristic,
             distance,
             isOccupied,
@@ -250,7 +253,7 @@ export class Grid<T> {
      * @returns the first point matching the filter, searching outward
      */
     static spiralSearch(
-        center: Point,
+        center: PointValue,
         filter: (pt: Point) => boolean,
         range: number = 100
     ): Point | undefined {
