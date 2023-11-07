@@ -77,13 +77,19 @@ class Renderer {
 
     private renderView(view: View) {
         const viewRenderContext = new RenderContext(this.canvas, this.context, view)
-        let renders: RenderMethod[]
+        const renders: RenderMethod[] = []
         const [aggregateTime] = measure(() => {
-            renders = view.entities
-                .flatMap((entity) => entity?.components)
-                .filter((component) => !!component && component.enabled && component.isStarted)
-                .flatMap((component) => component.getRenderMethods())
-                .filter((render) => !!render)
+            for (const e of view.entities) {
+                for (const c of e?.components) {
+                    if (c?.enabled && c?.isStarted) {
+                        for (const r of c.getRenderMethods()) {
+                            if (r) {
+                                renders.push(r)
+                            }
+                        }
+                    }
+                }
+            }
         })
         const [sortTime] = measure(() => {
             renders.sort((a, b) => a.depth - b.depth)
