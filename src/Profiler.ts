@@ -64,7 +64,11 @@ class Profiler {
         this.shownInfo = []
     }
 
-    customTrackMovingAverage(key: string, value: number, displayFn: (number) => string) {
+    customTrackMovingAverage(
+        key: string,
+        value: number,
+        displayFn: (num: number) => string = (n) => `${key}: ${n}`
+    ) {
         let tracker = this.tracked.get(key)
         if (!tracker) {
             tracker = [new MovingAverage(), displayFn]

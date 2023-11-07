@@ -1,6 +1,9 @@
+import { debug } from "../Debug"
 import { Point } from "../Point"
+import { measure, profiler } from "../Profiler"
 import { View } from "../View"
 import { RenderContext } from "./RenderContext"
+import { RenderMethod } from "./RenderMethod"
 
 export type CanvasOptions = {
     scale?: number
@@ -43,7 +46,15 @@ class Renderer {
         this.context.imageSmoothingEnabled = false
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-        views.forEach((v) => this.renderView(v))
+        views.forEach((v, i) => {
+            const stats = this.renderView(v)
+            if (debug.showRenderStats) {
+                profiler.customTrackMovingAverage(`view-${i}-aggregateTime`, stats.aggregateTime)
+                profiler.customTrackMovingAverage(`view-${i}-sortTime`, stats.sortTime)
+                profiler.customTrackMovingAverage(`view-${i}-renderTime`, stats.renderTime)
+                profiler.customTrackMovingAverage(`view-${i}-renderCount`, stats.renderCount)
+            }
+        })
     }
 
     private resizeCanvas() {
@@ -66,13 +77,21 @@ class Renderer {
 
     private renderView(view: View) {
         const viewRenderContext = new RenderContext(this.canvas, this.context, view)
-        view.entities
-            .flatMap((entity) => entity?.components)
-            .filter((component) => !!component && component.enabled && component.isStarted)
-            .flatMap((component) => component.getRenderMethods())
-            .filter((render) => !!render)
-            .sort((a, b) => a.depth - b.depth) // TODO possibly improve this
-            .forEach((renderMethod) => renderMethod.render(viewRenderContext))
+        let renders: RenderMethod[]
+        const [aggregateTime] = measure(() => {
+            renders = view.entities
+                .flatMap((entity) => entity?.components)
+                .filter((component) => !!component && component.enabled && component.isStarted)
+                .flatMap((component) => component.getRenderMethods())
+                .filter((render) => !!render)
+        })
+        const [sortTime] = measure(() => {
+            renders.sort((a, b) => a.depth - b.depth)
+        })
+        const [renderTime] = measure(() => {
+            renders.forEach((renderMethod) => renderMethod.render(viewRenderContext))
+        })
+        return { aggregateTime, sortTime, renderTime, renderCount: renders.length }
     }
 }
 

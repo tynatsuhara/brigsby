@@ -3,6 +3,7 @@ const _debug = Object.assign(
     {
         showColliders: false,
         showProfiler: false,
+        showRenderStats: false,
     },
     loadDebug()
 )
