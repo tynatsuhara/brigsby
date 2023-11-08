@@ -67,7 +67,7 @@ class Profiler {
     customTrackMovingAverage(
         key: string,
         value: number,
-        displayFn: (num: number) => string = (n) => `${key}: ${n}`
+        displayFn: (num: number) => string = (n) => `${key}: ${Math.round(100 * n) / 100}`
     ) {
         let tracker = this.tracked.get(key)
         if (!tracker) {
