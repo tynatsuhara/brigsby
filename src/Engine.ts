@@ -58,7 +58,9 @@ export class Engine {
 
         this.game.initialize()
 
-        requestAnimationFrame(() => this.tick())
+        this.tick = this.tick.bind(this)
+
+        requestAnimationFrame(this.tick)
     }
 
     private tick() {
@@ -172,6 +174,6 @@ export class Engine {
         this.lastUpdateMillis = time
         this.tickCounter++
 
-        requestAnimationFrame(() => this.tick())
+        requestAnimationFrame(this.tick)
     }
 }

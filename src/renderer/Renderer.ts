@@ -46,15 +46,7 @@ class Renderer {
         this.context.imageSmoothingEnabled = false
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-        views.forEach((v, i) => {
-            const stats = this.renderView(v)
-            if (debug.showRenderStats) {
-                profiler.customTrackMovingAverage(`view-${i}-aggregateTime`, stats.aggregateTime)
-                profiler.customTrackMovingAverage(`view-${i}-sortTime`, stats.sortTime)
-                profiler.customTrackMovingAverage(`view-${i}-renderTime`, stats.renderTime)
-                profiler.customTrackMovingAverage(`view-${i}-renderCount`, stats.renderCount)
-            }
-        })
+        views.forEach((v, i) => this.renderView(v, i))
     }
 
     private resizeCanvas() {
@@ -75,10 +67,12 @@ class Renderer {
         this.canvas.height = clientHeight / this.scale
     }
 
-    private renderView(view: View) {
+    private renderView(view: View, viewIndex: number) {
         const viewRenderContext = new RenderContext(this.canvas, this.context, view)
         const renders: RenderMethod[] = []
-        const [aggregateTime] = measure(() => {
+
+        // Don't use anonymous functions, that way they show up in the profiler
+        const aggregate = () => {
             for (const e of view.entities) {
                 for (const c of e?.components) {
                     if (c?.enabled && c?.isStarted) {
@@ -90,14 +84,24 @@ class Renderer {
                     }
                 }
             }
-        })
-        const [sortTime] = measure(() => {
+        }
+        const sort = () => {
             renders.sort((a, b) => a.depth - b.depth)
-        })
-        const [renderTime] = measure(() => {
+        }
+        const render = () => {
             renders.forEach((renderMethod) => renderMethod.render(viewRenderContext))
-        })
-        return { aggregateTime, sortTime, renderTime, renderCount: renders.length }
+        }
+
+        const [aggregateTime] = measure(aggregate)
+        const [sortTime] = measure(sort)
+        const [renderTime] = measure(render)
+
+        if (debug.showRenderStats) {
+            profiler.customTrackMovingAverage(`view-${viewIndex}-aggregateTime`, aggregateTime)
+            profiler.customTrackMovingAverage(`view-${viewIndex}-sortTime`, sortTime)
+            profiler.customTrackMovingAverage(`view-${viewIndex}-renderTime`, renderTime)
+            profiler.customTrackMovingAverage(`view-${viewIndex}-renderCount`, renders.length)
+        }
     }
 }
 
