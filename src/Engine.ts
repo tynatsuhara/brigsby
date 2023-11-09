@@ -87,22 +87,18 @@ export class Engine {
         collisionEngine._setViewContext(views)
 
         /**
-         * foreach which short circuits if the game scene changes
+         * we want to short circuit updates if the game scene changes at any point
          */
-        const forEachSafely = <T>(list: T[], fn: (t: T) => void) => {
-            for (const t of list) {
-                if (this.game.scene !== scene) {
-                    return
-                }
-
-                fn(t)
-            }
-        }
+        const isSafeToProceed = () => this.game.scene === scene
 
         let componentsUpdated = 0
 
-        const [updateDuration] = measure(() => {
-            forEachSafely(views, (v) => {
+        const update = () => {
+            for (const v of views) {
+                if (!isSafeToProceed()) {
+                    break
+                }
+
                 v.entities = v.entities.filter((e) => !!e)
 
                 const dimensions = renderer.getDimensions().div(v.zoom)
@@ -118,28 +114,35 @@ export class Engine {
                 }
 
                 // Behavior where an entity belongs to multiple views is undefined (revisit later, eg for splitscreen)
-                forEachSafely(v.entities, (e) =>
-                    forEachSafely(e.components, (c) => {
-                        if (!c.enabled || !c.entity) {
-                            return
+                for (const e of v.entities) {
+                    if (isSafeToProceed()) {
+                        for (const c of e.components) {
+                            if (isSafeToProceed() && c.enabled && c.entity) {
+                                if (!c.isStarted) {
+                                    c.start(startData)
+                                    c.start = ALREADY_STARTED_COMPONENT
+                                }
+                                c.update(updateData)
+                                componentsUpdated++
+                            }
                         }
-                        if (!c.isStarted) {
-                            c.start(startData)
-                            c.start = ALREADY_STARTED_COMPONENT
-                        }
-                        c.update(updateData)
-                        componentsUpdated++
-                    })
-                )
-            })
-        })
+                    }
+                }
+            }
+        }
+        const [updateDuration] = measure(update)
 
-        const [renderDuration] = measure(() => {
+        const render = () => {
             renderer._render(views)
-        })
+        }
+        const [renderDuration] = measure(render)
 
-        const [lateUpdateDuration] = measure(() => {
-            forEachSafely(views, (v) => {
+        const lateUpdate = () => {
+            for (const v of views) {
+                if (!isSafeToProceed()) {
+                    break
+                }
+
                 const updateData: UpdateData = {
                     view: v,
                     elapsedTimeMillis: updateViewsContext.elapsedTimeMillis,
@@ -147,16 +150,19 @@ export class Engine {
                     dimensions: renderer.getDimensions().div(v.zoom),
                     tick: this.tickCounter,
                 }
-                forEachSafely(v.entities, (e) =>
-                    forEachSafely(e.components, (c) => {
-                        if (!c.enabled || !c.entity) {
-                            return
+
+                for (const e of v.entities) {
+                    if (isSafeToProceed()) {
+                        for (const c of e.components) {
+                            if (isSafeToProceed() && c.enabled && c.entity) {
+                                c.lateUpdate(updateData)
+                            }
                         }
-                        c.lateUpdate(updateData)
-                    })
-                )
-            })
-        })
+                    }
+                }
+            }
+        }
+        const [lateUpdateDuration] = measure(lateUpdate)
 
         if (debug.showProfiler) {
             profiler._updateEngineTickStats(
