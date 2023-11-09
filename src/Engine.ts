@@ -39,6 +39,7 @@ export class Engine {
     private tickCounter = 1
 
     private lastUpdateMillis = new Date().getTime()
+    private lastUpdateEndMillis = new Date().getTime()
 
     static start(game: Game, canvas: HTMLCanvasElement, canvasOptions: CanvasOptions = {}) {
         if (!game) {
@@ -170,7 +171,8 @@ export class Engine {
                 updateDuration,
                 renderDuration,
                 lateUpdateDuration,
-                componentsUpdated
+                componentsUpdated,
+                time - this.lastUpdateEndMillis
             )
             profiler._flush()
         } else {
@@ -178,6 +180,7 @@ export class Engine {
         }
 
         this.lastUpdateMillis = time
+        this.lastUpdateEndMillis = new Date().getTime()
         this.tickCounter++
 
         requestAnimationFrame(this.tick)

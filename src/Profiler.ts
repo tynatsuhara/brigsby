@@ -3,6 +3,7 @@ class Profiler {
     private updateTracker = new MovingAverage()
     private renderTracker = new MovingAverage()
     private lateUpdateTracker = new MovingAverage()
+    private idleTimeTracker = new MovingAverage()
     private componentsUpdated: number
 
     private tracked = new Map<string, [MovingAverage, (number) => string]>()
@@ -41,13 +42,15 @@ class Profiler {
         msForUpdate: number,
         msForRender: number,
         msForLateUpdate: number,
-        componentsUpdated: number
+        componentsUpdated: number,
+        idleTime: number
     ) {
         this.fpsTracker.record(msSinceLastUpdate)
         this.updateTracker.record(msForUpdate)
         this.renderTracker.record(msForRender)
         this.lateUpdateTracker.record(msForLateUpdate)
         this.componentsUpdated = componentsUpdated
+        this.idleTimeTracker.record(idleTime)
 
         this.displayed = [
             `FPS: ${round(1000 / this.fpsTracker.get())} (${round(
@@ -56,6 +59,7 @@ class Profiler {
             `update() duration ms: ${round(this.updateTracker.get(), 2)}`,
             `render() duration ms: ${round(this.renderTracker.get(), 2)}`,
             `lateUpdate() duration ms: ${round(this.lateUpdateTracker.get(), 2)}`,
+            `tick gap ms: ${round(this.idleTimeTracker.get(), 2)}`,
             `components updated: ${this.componentsUpdated}`,
             ...Array.from(this.tracked.values()).map((v) => v[1](v[0].get())),
             ...this.shownInfo,
@@ -67,7 +71,7 @@ class Profiler {
     customTrackMovingAverage(
         key: string,
         value: number,
-        displayFn: (num: number) => string = (n) => `${key}: ${Math.round(100 * n) / 100}`
+        displayFn: (num: number) => string = (n) => `${key}: ${round(n, 2)}`
     ) {
         let tracker = this.tracked.get(key)
         if (!tracker) {
@@ -85,9 +89,9 @@ class Profiler {
     }
 }
 
-const round = (val: number, pow = 0) => {
-    const decimals = Math.pow(10, pow)
-    return Math.round(val * decimals) / decimals
+const round = (val: number, decimals = 0) => {
+    const scale = Math.pow(10, decimals)
+    return Math.round(val * scale) / scale
 }
 
 class MovingAverage {
